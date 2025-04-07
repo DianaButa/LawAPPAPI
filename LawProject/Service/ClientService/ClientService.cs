@@ -14,11 +14,10 @@ namespace LawProject.Service.ClientService
       _context = context;
     }
 
-    public async Task<IEnumerable<ClientDto>> GetAllAsync()
+    public async Task<IEnumerable<ClientPFDto>> GetAllPFAsync()
     {
-      var clients = await _context.Clients.ToListAsync();
-
-      var filesDTOs = clients.Select(client => new ClientDto
+      var clients = await _context.ClientPFs.ToListAsync();  // Adaptează la contextul tău
+      return clients.Select(client => new ClientPFDto
       {
         Id = client.Id,
         FirstName = client.FirstName,
@@ -26,22 +25,55 @@ namespace LawProject.Service.ClientService
         CNP = client.CNP,
         Email = client.Email,
         Address = client.Address,
+        PhoneNumber = client.PhoneNumber
       });
-
-      return filesDTOs;
     }
-    public async Task AddClient(ClientDto clientDTO)
+
+    // Obține toate persoanele juridice
+    public async Task<IEnumerable<ClientPJDto>> GetAllPJAsync()
     {
-      var newClient = new Client
+      var clients = await _context.ClientPJs.ToListAsync();  // Adaptează la contextul tău
+      return clients.Select(client => new ClientPJDto
       {
-        FirstName = clientDTO.FirstName,
-        LastName = clientDTO.LastName,
-        CNP = clientDTO.CNP,
-        Email = clientDTO.Email,
-        Address = clientDTO.Address,
+        Id = client.Id,
+        CompanyName = client.CompanyName,
+        CUI = client.CUI,
+        Email = client.Email,
+        Address = client.Address,
+        PhoneNumber = client.PhoneNumber
+      });
+    }
+
+    // Adăugare client persoană fizică
+    public async Task AddClientPF(ClientPFDto clientDto)
+    {
+      var newClient = new ClientPF
+      {
+        FirstName = clientDto.FirstName,
+        LastName = clientDto.LastName,
+        CNP = clientDto.CNP,
+        Email = clientDto.Email,
+        Address = clientDto.Address,
+        PhoneNumber = clientDto.PhoneNumber
       };
 
-      _context.Clients.Add(newClient);
+      _context.ClientPFs.Add(newClient);  // Adaptează la contextul tău
+      await _context.SaveChangesAsync();
+    }
+
+    // Adăugare client persoană juridică
+    public async Task AddClientPJ(ClientPJDto clientDto)
+    {
+      var newClient = new ClientPJ
+      {
+        CompanyName = clientDto.CompanyName,
+        CUI = clientDto.CUI,
+        Email = clientDto.Email,
+        Address = clientDto.Address,
+        PhoneNumber = clientDto.PhoneNumber
+      };
+
+      _context.ClientPJs.Add(newClient);  // Adaptează la contextul tău
       await _context.SaveChangesAsync();
     }
   }

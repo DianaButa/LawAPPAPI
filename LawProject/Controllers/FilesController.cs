@@ -1,3 +1,4 @@
+using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Service;
 using LawProject.Service.EmailService;
@@ -18,14 +19,16 @@ namespace LawProject.Controllers
     private readonly FileToCalendarService _fileToCalendarService;
     private readonly MyQueryService _queryService;
     private readonly ILogger<FilesController> _logger;
-    private readonly EmailService _emailService;
+    private readonly ApplicationDbContext _context;
+    private readonly IEmailService _emailService;
     public FilesController(FileManagementService fileManagementService, FileToCalendarService fileToCalendarService, MyQueryService queryService,
-                                ILogger<FilesController> logger, EmailService emailService)
+                                ILogger<FilesController> logger, IEmailService emailService, ApplicationDbContext _context)
     {
       _fileManagementService = fileManagementService;
       _fileToCalendarService = fileToCalendarService;
       _queryService = queryService;
       _logger = logger;
+      _context = _context;
       _emailService = emailService;
 
     }
@@ -185,6 +188,31 @@ namespace LawProject.Controllers
         _logger.LogError($"Error deleting file: {ex.Message}");
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
+    }
+
+    // Endpoint pentru actualizarea stadiului dosarului
+    [HttpPut("update-status/{id}")]
+    public async Task<IActionResult> UpdateFileStatus(int id, [FromBody] string newStatus)
+    {
+      var dosar = await _context.Files.FindAsync(id);
+      if (dosar == null)
+      {
+        return NotFound($"Dosarul cu ID {id} nu a fost găsit.");
+      }
+
+      // Verificăm dacă stadiul este valid
+      if (newStatus != "Deschis" && newStatus != "Inchis")
+      {
+        return BadRequest("Stadiul trebuie să fie 'Deschis' sau 'Închis'.");
+      }
+
+      // Actualizăm stadiul dosarului
+      dosar.Stadiu = newStatus;
+      await _context.SaveChangesAsync();
+
+      _logger.LogInformation($"Stadiul dosarului {id} a fost actualizat la {newStatus}.");
+
+      return Ok(new { Message = "Stadiul dosarului a fost actualizat cu succes." });
     }
 
 

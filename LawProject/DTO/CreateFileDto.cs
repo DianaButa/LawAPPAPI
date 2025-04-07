@@ -12,6 +12,8 @@ namespace LawProject.DTO
     [Required(ErrorMessage = "ID-ul clientului este obligatoriu")]
     public int ClientId { get; set; }
 
+    public string ClientType { get; set; }
+
     // ClientName is optional as it will be set automatically from the client's first and last name
     public string? ClientName { get; set; }
 
@@ -19,10 +21,12 @@ namespace LawProject.DTO
 
     public string Email { get; set; } = string.Empty;
 
+
     [Required(ErrorMessage = "Tipul dosarului este obligatoriu")]
     [RegularExpression("^(civil|penal)$", ErrorMessage = "Tipul dosarului trebuie să fie 'civil' sau 'penal'")]
     public string TipDosar { get; set; } = string.Empty;
 
-    public int LawyerId { get; set; }
+    public int? LawyerId { get; set; }
+    public string LawyerName { get; set; } = string.Empty;
   }
 }

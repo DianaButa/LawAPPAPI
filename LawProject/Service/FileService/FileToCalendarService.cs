@@ -2,6 +2,7 @@ using LawProject.Database;
 using LawProject.Models;
 using LawProject.Service.EmailService;
 using LawProject.Service.Notifications;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Service.FileService
 {
@@ -97,8 +98,17 @@ namespace LawProject.Service.FileService
         }
 
 
-        // Determinăm culoarea în funcție de tipul dosarului
-        string color = dosarDb.TipDosar.ToLower() == "penal" ? "#707070" : "#E0E0E0";
+        // Obținem avocatul asociat dosarului și culoarea acestuia
+        // Asigură-te că `LawyerId` este de un tip statetic
+        int lawyerId = Convert.ToInt32(dosarDb.LawyerId);
+
+        var lawyer = await _context.Lawyers
+                                    .Where(l => l.Id == lawyerId)
+                                    .FirstOrDefaultAsync();
+
+
+        string color = lawyer?.Color ?? "#E0E0E0"; // Dacă avocatul nu este găsit, folosim o culoare implicită
+
 
 
         var sedinteList = dosar.sedinte as IEnumerable<dynamic>;

@@ -1,6 +1,6 @@
 namespace LawProject.DTO
 {
-  public class ClientDto
+  public class ClientPFDto
   {
 
     public int Id { get; set; }
@@ -14,6 +14,8 @@ namespace LawProject.DTO
     public string Email { get; set; } = string.Empty;
 
     public string Address {  get; set; } = string.Empty;
+
+    public string PhoneNumber {  get; set; } = string.Empty;
 
     
   }

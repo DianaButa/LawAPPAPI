@@ -10,6 +10,8 @@ namespace LawProject.DTO
     public string Email { get; set; } = string.Empty;
     public string TipDosar { get; set; } = string.Empty;
 
+    public string LawyerName { get; set; } = string.Empty;
+
     // Informații din SOAP (FileDetailsDTO)
     public string Numar { get; set; }
     public string NumarVechi { get; set; }

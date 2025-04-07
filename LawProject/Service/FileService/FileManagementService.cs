@@ -89,6 +89,7 @@ namespace LawProject.Service.FileService
 
       // Preluăm din baza de date toate dosarele (informații de bază)
       var dbFiles = await _context.Files
+        .Include(f => f.Lawyer)  // Eager load Lawyer details
            .Select(f => new CreateFileDto
            {
              Id = f.Id,
@@ -96,7 +97,8 @@ namespace LawProject.Service.FileService
              ClientName = f.ClientName,
              Details = f.Details,
 
-             TipDosar = f.TipDosar
+             TipDosar = f.TipDosar,
+              LawyerName = f.Lawyer != null ? f.Lawyer.LawyerName : string.Empty  // Get Lawyer's name if available
            })
            .ToListAsync();
 
@@ -128,7 +130,8 @@ namespace LawProject.Service.FileService
             ClientName = dbFile.ClientName,
             Details = dbFile.Details,
             Email = dbFile.Email,
-            TipDosar = dbFile.TipDosar
+            TipDosar = dbFile.TipDosar,
+             LawyerName = dbFile.LawyerName  // Add Lawyer's name
             // Restul proprietăților rămân nule/default
           });
           continue;
@@ -147,6 +150,7 @@ namespace LawProject.Service.FileService
             Details = dbFile.Details,
             Email = dbFile.Email,
             TipDosar = dbFile.TipDosar,
+            LawyerName = dbFile.LawyerName,  // Add Lawyer's name
 
             // Informații din SOAP
             Numar = soapDosar.numar,
@@ -187,73 +191,117 @@ namespace LawProject.Service.FileService
       return combinedFilesList;
     }
 
-
     public async Task AddFileAsync(CreateFileDto dto)
     {
       _logger.LogInformation("Adding new file...");
 
-      // Asigură-te că detaliile sunt setate corect
-      if (string.IsNullOrEmpty(dto.FileNumber))
+      try
       {
-        _logger.LogError("File number is required.");
-        throw new ArgumentException("Numărul fișierului este obligatoriu.", nameof(dto.FileNumber));
+        // Verificăm că numărul fișierului este valid
+        if (string.IsNullOrEmpty(dto.FileNumber))
+        {
+          _logger.LogError("File number is required.");
+          throw new ArgumentException("Numărul fișierului este obligatoriu.", nameof(dto.FileNumber));
+        }
+
+        // Verificăm tipul clientului și căutăm în tabela corespunzătoare
+        ClientPF clientPF = null;
+        ClientPJ clientPJ = null;
+
+        if (dto.ClientType == "PF")
+        {
+          clientPF = await _context.ClientPFs.FindAsync(dto.ClientId);
+        }
+        else if (dto.ClientType == "PJ")
+        {
+          clientPJ = await _context.ClientPJs.FindAsync(dto.ClientId);
+        }
+        else
+        {
+          _logger.LogError($"Client type {dto.ClientType} is invalid.");
+          throw new ArgumentException($"Tipul clientului {dto.ClientType} este invalid.", nameof(dto.ClientType));
+        }
+
+        // Dacă nu găsim clientul în tabelul corespunzător, returnăm eroare
+        if (clientPF == null && clientPJ == null)
+        {
+          _logger.LogError($"Client with ID {dto.ClientId} not found.");
+          throw new ArgumentException($"Clientul cu ID {dto.ClientId} nu a fost găsit.", nameof(dto.ClientId));
+        }
+
+        // Verificăm dacă avocatul este specificat și dacă există în baza de date
+        LawProject.Models.Lawyer lawyer = null;
+        if (dto.LawyerId.HasValue)
+        {
+          lawyer = await _context.Lawyers.FindAsync(dto.LawyerId.Value);
+          if (lawyer == null)
+          {
+            _logger.LogError($"Lawyer with ID {dto.LawyerId} not found.");
+            throw new ArgumentException($"Avocatul cu ID {dto.LawyerId} nu a fost găsit.", nameof(dto.LawyerId));
+          }
+        }
+
+        // Creăm fișierul
+        var file = new MyFile
+        {
+          FileNumber = dto.FileNumber,
+          ClientName = clientPF != null ? $"{clientPF.FirstName} {clientPF.LastName}" : clientPJ?.CompanyName,
+          ClientId = dto.ClientId,
+          Details = dto.Details,
+          TipDosar = dto.TipDosar,
+          CuloareCalendar = dto.TipDosar switch
+          {
+            "civil" => "#D3D3D3",
+            "penal" => "#808080",
+            _ => throw new ArgumentException("Tipul de dosar este invalid.")
+          },
+          // Optional: Setting the lawyer if specified
+          LawyerId = dto.LawyerId
+        };
+
+        // Adăugăm fișierul în context
+        _context.Files.Add(file);
+
+        // Salvăm modificările în baza de date
+        await _context.SaveChangesAsync();
+        _logger.LogInformation($"File with file number {dto.FileNumber} added successfully.");
+
+        // Creăm notificarea
+        var notification = new Notification
+        {
+          Title = "Fișier nou adăugat",
+          Message = $"Un nou fișier a fost adăugat: {dto.FileNumber}",
+          Timestamp = DateTime.UtcNow,
+          Type = "new_file",
+          FileNumber = dto.FileNumber,
+          IsRead = false,
+          Details = $"Client: {file.ClientName}, Tip dosar: {dto.TipDosar}",
+          UserId = 1 // Trebuie să obții UserId din contextul actual
+        };
+
+        // Creăm notificarea în sistem
+        await _notificationService.CreateNotificationAsync(notification);
+
+        _logger.LogInformation($"Notification for file {dto.FileNumber} created successfully.");
       }
-
-      // Fetch client details from database
-      var client = await _context.Clients.FindAsync(dto.ClientId);
-      if (client == null)
+      catch (ArgumentException ex)
       {
-        _logger.LogError($"Client with ID {dto.ClientId} not found.");
-        throw new ArgumentException($"Clientul cu ID {dto.ClientId} nu a fost găsit.", nameof(dto.ClientId));
+        _logger.LogError($"Validation error: {ex.Message}");
+        throw; // Re-throw the exception or handle accordingly
       }
-
-      if (string.IsNullOrEmpty(dto.Details))
+      catch (Exception ex)
       {
-        _logger.LogWarning("Details are not provided, setting default value.");
-        dto.Details = "Detalii implicite"; // Setează detalii implicite dacă nu sunt furnizate
+        _logger.LogError($"An error occurred while adding the file: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+          _logger.LogError($"Inner exception: {ex.InnerException.Message}");
+        }
+        throw; // Ensure that the error is propagated correctly
       }
-
-      // Setează culoarea pe baza tipului de dosar
-      string colorId = dto.TipDosar switch
-      {
-        "civil" => "#D3D3D3",
-        "penal" => "#808080",
-        _ => throw new ArgumentException("Tipul de dosar este invalid.")
-      };
-
-      // Creează un nou fișier pe baza DTO-ului
-      var file = new MyFile
-      {
-        Id = dto.Id,
-        FileNumber = dto.FileNumber,
-        ClientName = $"{client.FirstName} {client.LastName}", // Combine first and last name
-        ClientId = dto.ClientId,
-        Details = dto.Details,
-        TipDosar = dto.TipDosar,
-        CuloareCalendar = colorId // Setează colorId
-      };
-
-      // Adaugă fișierul în baza de date
-      _context.Files.Add(file);
-      await _context.SaveChangesAsync();
-
-      // Create notification for the new file
-      var notification = new Notification
-      {
-        Title = "Fișier nou adăugat",
-        Message = $"Un nou fișier a fost adăugat: {dto.FileNumber}",
-        Timestamp = DateTime.UtcNow,
-        Type = "new_file",
-        FileNumber = dto.FileNumber,
-        IsRead = false,
-        Details = $"Client: {file.ClientName}, Tip dosar: {dto.TipDosar}",
-        UserId = 1 // You might want to get this from the current user context
-      };
-
-      await _notificationService.CreateNotificationAsync(notification);
-
-      _logger.LogInformation($"File with file number {dto.FileNumber} added successfully.");
     }
+
+
+
 
     public async Task<CreateFileDto> GetFileByNumberAsync(string fileNumber)
     {
@@ -333,7 +381,9 @@ namespace LawProject.Service.FileService
     {
       _logger.LogInformation($"Updating file with ID {id}...");
 
-      var existingFile = await _context.Files.FindAsync(id);
+      var existingFile = await _context.Files
+     .Include(f => f.Lawyer)  // Include Lawyer details to access LawyerName
+     .FirstOrDefaultAsync(f => f.Id == id);
 
       if (existingFile == null)
       {
@@ -342,17 +392,22 @@ namespace LawProject.Service.FileService
       }
 
       // Fetch client details from database if ClientId is provided
+      ClientPF clientPF = null;
+      ClientPJ clientPJ = null;
+
       if (dto.ClientId > 0)
       {
-        var client = await _context.Clients.FindAsync(dto.ClientId);
-        if (client == null)
-        {
-          _logger.LogError($"Client with ID {dto.ClientId} not found.");
-          throw new ArgumentException($"Clientul cu ID {dto.ClientId} nu a fost găsit.", nameof(dto.ClientId));
-        }
-        existingFile.ClientName = $"{client.FirstName} {client.LastName}";
+        clientPF = await _context.ClientPFs.FindAsync(dto.ClientId);
+        clientPJ = await _context.ClientPJs.FindAsync(dto.ClientId);
       }
 
+      if (clientPF == null && clientPJ == null)
+      {
+        _logger.LogError($"Client with ID {dto.ClientId} not found.");
+        throw new ArgumentException($"Clientul cu ID {dto.ClientId} nu a fost găsit.", nameof(dto.ClientId));
+      }
+
+      // Update file details
       existingFile.FileNumber = dto.FileNumber;
       existingFile.Details = dto.Details ?? existingFile.Details;
       existingFile.TipDosar = dto.TipDosar;
@@ -363,8 +418,24 @@ namespace LawProject.Service.FileService
         _ => existingFile.CuloareCalendar
       };
 
+      // Update Lawyer if specified in the DTO (optional)
+      if (dto.LawyerId.HasValue)
+      {
+        var lawyer = await _context.Lawyers.FindAsync(dto.LawyerId.Value);
+        if (lawyer == null)
+        {
+          _logger.LogError($"Lawyer with ID {dto.LawyerId} not found.");
+          throw new ArgumentException($"Avocatul cu ID {dto.LawyerId} nu a fost găsit.", nameof(dto.LawyerId));
+        }
+        existingFile.LawyerId = dto.LawyerId.Value;
+      }
+
+      // Save changes to database
       _context.Files.Update(existingFile);
       await _context.SaveChangesAsync();
+
+      // Get the LawyerName (if available) for the notification
+      string lawyerName = existingFile.Lawyer != null ? existingFile.Lawyer.LawyerName : "N/A";
 
       // Create notification for file update
       var notification = new Notification
@@ -375,7 +446,7 @@ namespace LawProject.Service.FileService
         Type = "file_updated",
         FileNumber = dto.FileNumber,
         IsRead = false,
-        Details = $"Client: {existingFile.ClientName}, Tip dosar: {dto.TipDosar}",
+        Details = $"Client: {existingFile.ClientName}, Tip dosar: {dto.TipDosar}, Avocat: {lawyerName}",
         UserId = 1 // TODO: Get from current user context
       };
 
@@ -423,6 +494,7 @@ namespace LawProject.Service.FileService
     {
       // Căutăm fișierul în baza de date după ID
       var file = await _context.Files
+         .Include(f => f.Lawyer) // Include entitatea Lawyer
           .Where(d => d.Id == id)
           .Select(d => new CreateFileDto
           {
@@ -430,7 +502,8 @@ namespace LawProject.Service.FileService
             FileNumber = d.FileNumber,
             ClientName = d.ClientName,
             TipDosar = d.TipDosar,
-            Details = d.Details
+            Details = d.Details,
+            LawyerName = d.Lawyer != null ? d.Lawyer.LawyerName : string.Empty, // Obține numele avocatului
           })
           .FirstOrDefaultAsync();
 

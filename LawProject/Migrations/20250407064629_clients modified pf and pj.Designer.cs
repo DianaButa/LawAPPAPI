@@ -4,6 +4,7 @@ using LawProject.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LawProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407064629_clients modified pf and pj")]
+    partial class clientsmodifiedpfandpj
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,10 +40,6 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ClientType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -63,21 +61,6 @@ namespace LawProject.Migrations
                     b.ToTable("ClientPFs");
                 });
 
-            modelBuilder.Entity("LawProject.Models.ClientPFFile", b =>
-                {
-                    b.Property<int>("ClientPFId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MyFileId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ClientPFId", "MyFileId");
-
-                    b.HasIndex("MyFileId");
-
-                    b.ToTable("ClientPFFiles");
-                });
-
             modelBuilder.Entity("LawProject.Models.ClientPJ", b =>
                 {
                     b.Property<int>("Id")
@@ -91,10 +74,6 @@ namespace LawProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CUI")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -113,21 +92,6 @@ namespace LawProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ClientPJs");
-                });
-
-            modelBuilder.Entity("LawProject.Models.ClientPJFile", b =>
-                {
-                    b.Property<int>("ClientPJId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MyFileId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ClientPJId", "MyFileId");
-
-                    b.HasIndex("MyFileId");
-
-                    b.ToTable("ClientPJFiles");
                 });
 
             modelBuilder.Entity("LawProject.Models.Lawyer", b =>
@@ -151,21 +115,6 @@ namespace LawProject.Migrations
                     b.ToTable("Lawyers");
                 });
 
-            modelBuilder.Entity("LawProject.Models.LawyerFile", b =>
-                {
-                    b.Property<int>("LawyerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FileId")
-                        .HasColumnType("int");
-
-                    b.HasKey("LawyerId", "FileId");
-
-                    b.HasIndex("FileId");
-
-                    b.ToTable("LawyerFiles");
-                });
-
             modelBuilder.Entity("LawProject.Models.MyFile", b =>
                 {
                     b.Property<int>("Id")
@@ -181,12 +130,6 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ClientPFId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClientPJId")
-                        .HasColumnType("int");
-
                     b.Property<string>("CuloareCalendar")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -199,21 +142,13 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LawyerId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<string>("TipDosar")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientPFId");
-
-                    b.HasIndex("ClientPJId");
-
-                    b.HasIndex("LawyerId");
+                    b.HasIndex("ClientId");
 
                     b.ToTable("Files");
                 });
@@ -342,84 +277,15 @@ namespace LawProject.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("LawProject.Models.ClientPFFile", b =>
-                {
-                    b.HasOne("LawProject.Models.ClientPF", "ClientPF")
-                        .WithMany("ClientPFFiles")
-                        .HasForeignKey("ClientPFId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LawProject.Models.MyFile", "MyFile")
-                        .WithMany("ClientPFFiles")
-                        .HasForeignKey("MyFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClientPF");
-
-                    b.Navigation("MyFile");
-                });
-
-            modelBuilder.Entity("LawProject.Models.ClientPJFile", b =>
-                {
-                    b.HasOne("LawProject.Models.ClientPJ", "ClientPJ")
-                        .WithMany("ClientPJFiles")
-                        .HasForeignKey("ClientPJId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LawProject.Models.MyFile", "MyFile")
-                        .WithMany("ClientPJFiles")
-                        .HasForeignKey("MyFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClientPJ");
-
-                    b.Navigation("MyFile");
-                });
-
-            modelBuilder.Entity("LawProject.Models.LawyerFile", b =>
-                {
-                    b.HasOne("LawProject.Models.MyFile", "File")
-                        .WithMany("LawyerFiles")
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
-                        .WithMany("LawyerFiles")
-                        .HasForeignKey("LawyerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("File");
-
-                    b.Navigation("Lawyer");
-                });
-
             modelBuilder.Entity("LawProject.Models.MyFile", b =>
                 {
-                    b.HasOne("LawProject.Models.ClientPF", "ClientPF")
+                    b.HasOne("LawProject.Models.ClientPF", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientPFId");
-
-                    b.HasOne("LawProject.Models.ClientPJ", "ClientPJ")
-                        .WithMany()
-                        .HasForeignKey("ClientPJId");
-
-                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
-                        .WithMany()
-                        .HasForeignKey("LawyerId")
+                        .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ClientPF");
-
-                    b.Navigation("ClientPJ");
-
-                    b.Navigation("Lawyer");
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("LawProject.Models.Notes", b =>
@@ -433,29 +299,8 @@ namespace LawProject.Migrations
                     b.Navigation("Dosar");
                 });
 
-            modelBuilder.Entity("LawProject.Models.ClientPF", b =>
-                {
-                    b.Navigation("ClientPFFiles");
-                });
-
-            modelBuilder.Entity("LawProject.Models.ClientPJ", b =>
-                {
-                    b.Navigation("ClientPJFiles");
-                });
-
-            modelBuilder.Entity("LawProject.Models.Lawyer", b =>
-                {
-                    b.Navigation("LawyerFiles");
-                });
-
             modelBuilder.Entity("LawProject.Models.MyFile", b =>
                 {
-                    b.Navigation("ClientPFFiles");
-
-                    b.Navigation("ClientPJFiles");
-
-                    b.Navigation("LawyerFiles");
-
                     b.Navigation("Notes");
                 });
 #pragma warning restore 612, 618
