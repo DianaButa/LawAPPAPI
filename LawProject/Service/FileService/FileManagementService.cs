@@ -87,22 +87,24 @@ namespace LawProject.Service.FileService
     {
       _logger.LogInformation("Fetching all files from the database...");
 
-      // Preluăm din baza de date toate dosarele (informații de bază)
+      // Preluăm toate fișierele din baza de date în memorie, cu avocații asociați
       var dbFiles = await _context.Files
-        .Include(f => f.Lawyer)  // Eager load Lawyer details
-           .Select(f => new CreateFileDto
-           {
-             Id = f.Id,
-             FileNumber = f.FileNumber,
-             ClientName = f.ClientName,
-             Details = f.Details,
+        .Include(f => f.Lawyer)
+        .ToListAsync();
 
-             TipDosar = f.TipDosar,
-              LawyerName = f.Lawyer != null ? f.Lawyer.LawyerName : string.Empty  // Get Lawyer's name if available
-           })
-           .ToListAsync();
+      // Proiectăm în CreateFileDto după ce datele sunt în memorie (IEnumerable)
+      var basicDtos = dbFiles.Select(f => new CreateFileDto
+      {
+        Id = f.Id,
+        FileNumber = f.FileNumber,
+        ClientName = f.ClientName,
+        Details = f.Details,
+        TipDosar = f.TipDosar,
+        LawyerName = f.Lawyer?.LawyerName ?? string.Empty,
+        LawyerId = f.Lawyer?.Id
+      }).ToList();
 
-      if (dbFiles == null || !dbFiles.Any())
+      if (!basicDtos.Any())
       {
         _logger.LogWarning("No files found in the database.");
         return new List<AllFilesDto>();
@@ -110,19 +112,16 @@ namespace LawProject.Service.FileService
 
       var combinedFilesList = new List<AllFilesDto>();
 
-      // Pentru fiecare dosar din baza de date, se interoghează serviciul SOAP
-      foreach (var dbFile in dbFiles)
+      foreach (var dbFile in basicDtos)
       {
         _logger.LogInformation($"Fetching SOAP details for file number: {dbFile.FileNumber}");
 
-        // Apelăm serviciul SOAP pentru a obține detaliile dosarului
         var soapDosare = await _queryService.CautareDosareAsync(dbFile.FileNumber);
 
         if (soapDosare == null || !soapDosare.Any())
         {
           _logger.LogWarning($"No SOAP details found for file number: {dbFile.FileNumber}");
-          // Poți decide dacă vrei să adaugi totuși obiectul din DB, chiar și fără detalii SOAP,
-          // sau să treci peste el. Aici vom adăuga obiectul din DB fără completări SOAP.
+
           combinedFilesList.Add(new AllFilesDto
           {
             Id = dbFile.Id,
@@ -131,56 +130,54 @@ namespace LawProject.Service.FileService
             Details = dbFile.Details,
             Email = dbFile.Email,
             TipDosar = dbFile.TipDosar,
-             LawyerName = dbFile.LawyerName  // Add Lawyer's name
-            // Restul proprietăților rămân nule/default
+            LawyerName = dbFile.LawyerName,
+            LawyerId = dbFile.LawyerId
           });
+
           continue;
         }
 
-        // Dacă serviciul SOAP returnează mai multe dosare, poți decide cum le combini.
-        // În exemplul de mai jos, pentru fiecare dosar SOAP se creează o intrare.
-        foreach (var soapDosar in soapDosare)
+        var mostRecentSoapDosar = soapDosare
+          .OrderByDescending(d => d.data)
+          .FirstOrDefault();
+
+        if (mostRecentSoapDosar != null)
         {
           var combinedDto = new AllFilesDto
           {
-            // Informații din baza de date
             Id = dbFile.Id,
             FileNumber = dbFile.FileNumber,
             ClientName = dbFile.ClientName,
             Details = dbFile.Details,
             Email = dbFile.Email,
             TipDosar = dbFile.TipDosar,
-            LawyerName = dbFile.LawyerName,  // Add Lawyer's name
+            LawyerName = dbFile.LawyerName,
+            LawyerId = dbFile.LawyerId,
 
-            // Informații din SOAP
-            Numar = soapDosar.numar,
-            NumarVechi = soapDosar.numarVechi, // presupunând că există o proprietate similară
-            Data = soapDosar.data,
-            Institutie = soapDosar.institutie.ToString(),
-            Departament = soapDosar.departament,
-            CategorieCaz = soapDosar.categorieCaz?.ToString(),
-            StadiuProcesual = soapDosar.stadiuProcesual?.ToString(),
-            Parti = soapDosar.parti?.Select(p => new ParteDTO
+            Numar = mostRecentSoapDosar.numar,
+            NumarVechi = mostRecentSoapDosar.numarVechi,
+            Data = mostRecentSoapDosar.data,
+            Institutie = mostRecentSoapDosar.institutie.ToString(),
+            Departament = mostRecentSoapDosar.departament,
+            CategorieCaz = mostRecentSoapDosar.categorieCaz?.ToString(),
+            StadiuProcesual = mostRecentSoapDosar.stadiuProcesual?.ToString(),
+            Parti = mostRecentSoapDosar.parti?.Select(p => new ParteDTO
             {
               Nume = p.nume,
               CalitateParte = p.calitateParte
             }).ToList(),
-            Sedinte = soapDosar.sedinte?.Select(s => new SedintaDTO
+            Sedinte = mostRecentSoapDosar.sedinte?.Select(s => new SedintaDTO
             {
               Complet = s.complet,
-              // Dacă s.data este de tip DateTime (non-nullable), îl atribuim direct:
               Data = s.data,
               Ora = s.ora,
               Solutie = s.solutie,
               SolutieSumar = s.solutieSumar,
               DataPronuntare = s.dataPronuntare,
-              // Convertim s.documentSedinta la string:
               DocumentSedinta = s.documentSedinta?.ToString() ?? string.Empty,
               NumarDocument = s.numarDocument,
               DataDocument = s.dataDocument
-            }).ToList(),
-
-
+            }).ToList()
           };
 
           combinedFilesList.Add(combinedDto);
@@ -190,6 +187,9 @@ namespace LawProject.Service.FileService
       _logger.LogInformation("Finished processing all file details.");
       return combinedFilesList;
     }
+
+
+
 
     public async Task AddFileAsync(CreateFileDto dto)
     {
@@ -241,6 +241,7 @@ namespace LawProject.Service.FileService
           }
         }
 
+
         // Creăm fișierul
         var file = new MyFile
         {
@@ -249,13 +250,7 @@ namespace LawProject.Service.FileService
           ClientId = dto.ClientId,
           Details = dto.Details,
           TipDosar = dto.TipDosar,
-          CuloareCalendar = dto.TipDosar switch
-          {
-            "civil" => "#D3D3D3",
-            "penal" => "#808080",
-            _ => throw new ArgumentException("Tipul de dosar este invalid.")
-          },
-          // Optional: Setting the lawyer if specified
+          CuloareCalendar = lawyer?.Color ?? "#E0E0E0",
           LawyerId = dto.LawyerId
         };
 
@@ -306,18 +301,22 @@ namespace LawProject.Service.FileService
     public async Task<CreateFileDto> GetFileByNumberAsync(string fileNumber)
     {
       return await _context.Files
+          .Include(d => d.Lawyer) 
           .Where(d => d.FileNumber == fileNumber)
           .Select(d => new CreateFileDto
           {
             Id = d.Id,
             FileNumber = d.FileNumber,
-            ClientName = d.ClientName,
             ClientId = d.ClientId,
+            ClientName = d.ClientName,
             TipDosar = d.TipDosar,
-            Details = d.Details
+            Details = d.Details,
+            LawyerId = d.Lawyer != null ? d.Lawyer.Id : (int?)null, 
+            LawyerName = d.Lawyer != null ? d.Lawyer.LawyerName : string.Empty
           })
-      .FirstOrDefaultAsync();
+          .FirstOrDefaultAsync();
     }
+
 
     public async Task<FileDetailsDto> GetFileDetailsByNumberAsync(string fileNumber)
     {
@@ -513,6 +512,21 @@ namespace LawProject.Service.FileService
     internal Task GetAllFileDetailsAsync()
     {
       throw new NotImplementedException();
+    }
+
+
+    public async Task<IEnumerable<MyFile>> GetFilesForClientAsync(int clientId)
+    {
+      
+      var clientFiles = await _context.Files
+                                      .Where(f => f.ClientId == clientId)
+                                      .ToListAsync();
+
+      if (clientFiles == null || !clientFiles.Any())
+      {
+        _logger.LogWarning($"Nu au fost găsite dosare pentru clientul cu ID {clientId}.");
+      }
+      return clientFiles;
     }
   }
 }

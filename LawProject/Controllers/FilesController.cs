@@ -207,7 +207,7 @@ namespace LawProject.Controllers
       }
 
       // Actualizăm stadiul dosarului
-      dosar.Stadiu = newStatus;
+      //dosar.Stadiu = newStatus;
       await _context.SaveChangesAsync();
 
       _logger.LogInformation($"Stadiul dosarului {id} a fost actualizat la {newStatus}.");
@@ -215,7 +215,27 @@ namespace LawProject.Controllers
       return Ok(new { Message = "Stadiul dosarului a fost actualizat cu succes." });
     }
 
+    [HttpGet("GetFilesForClient/{clientId}")]
+    public async Task<IActionResult> GetFilesForClient(int clientId)
+    {
+      try
+      {
+        // Se apelează metoda din serviciul de dosare (FileManagementService) care extrage dosarele pentru un client
+        var clientFiles = await _fileManagementService.GetFilesForClientAsync(clientId);
 
+        if (clientFiles == null || !clientFiles.Any())
+        {
+          return NotFound($"Nu au fost găsite dosare pentru clientul cu ID {clientId}.");
+        }
+
+        return Ok(clientFiles);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Error fetching files for client {clientId}: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
 
 
 

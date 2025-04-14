@@ -1,3 +1,5 @@
+using LawProject.DTO;
+
 namespace LawProject.Models
 {
   public class ScheduledEvent
@@ -13,5 +15,7 @@ namespace LawProject.Models
     public string Description { get; set; }
     public string ClientName { get; set; }
     public string Color { get; set; } // Culoarea pentru evenime
+
+  
   }
 }

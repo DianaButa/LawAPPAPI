@@ -41,6 +41,6 @@ namespace LawProject.Models
 
     public virtual ICollection<LawyerFile> LawyerFiles { get; set; } = new List<LawyerFile>();
 
-    public string Stadiu { get; set; } = "Deschis";
+ 
   }
 }

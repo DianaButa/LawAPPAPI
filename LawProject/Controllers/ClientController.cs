@@ -44,7 +44,7 @@ namespace LawProject.Controllers
     }
 
     // Adăugare client persoană fizică
-    [HttpPost("add/persoana-fizica")]
+    [HttpPost("persoane-fizice")]
     public async Task<IActionResult> AddClientPF(ClientPFDto clientDto)
     {
       try
@@ -59,7 +59,7 @@ namespace LawProject.Controllers
     }
 
     // Adăugare client persoană juridică
-    [HttpPost("add/persoana-juridica")]
+    [HttpPost("persoane-juridice")]
     public async Task<IActionResult> AddClientPJ(ClientPJDto clientDto)
     {
       try
