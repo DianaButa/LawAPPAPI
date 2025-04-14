@@ -8,9 +8,11 @@ using LawProject.Database;
 using LawProject.Service;
 using LawProject.Service.ClientService;
 using LawProject.Service.EmailService;
+using LawProject.Service.EventService;
 using LawProject.Service.FileService;
 using LawProject.Service.Lawyer;
 using LawProject.Service.Notifications;
+using LawProject.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
 using ServiceReference1;
 
@@ -44,9 +46,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<FileManagementService>();
 builder.Services.AddScoped<FileToCalendarService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ILawyerService, LawyerService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 

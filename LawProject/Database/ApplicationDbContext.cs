@@ -15,9 +15,15 @@ namespace LawProject.Database
 
     public DbSet<MyFile> Files { get; set; }
 
+    public DbSet<WorkTask> Tasks { get; set; }
+
     public DbSet<Notes> Notes { get; set; }
 
     public DbSet<Lawyer> Lawyers { get; set; }
+    public DbSet<EventA> EventsA { get; set; }
+
+    public DbSet<EventC> EventsC { get; set; }
+
 
     public DbSet<Notification> Notifications { get; set; }
 

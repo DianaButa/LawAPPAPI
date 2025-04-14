@@ -82,6 +82,7 @@ namespace LawProject.Service.FileService
       }
     }
 
+
     // Procesarea ședințelor și adăugarea lor în calendar
     public async Task ProcessDosarAsync(dynamic dosarDetails)
     {
@@ -97,18 +98,24 @@ namespace LawProject.Service.FileService
           continue;
         }
 
+        string color = "#E0E0E0";
 
-        // Obținem avocatul asociat dosarului și culoarea acestuia
-        // Asigură-te că `LawyerId` este de un tip statetic
-        int lawyerId = Convert.ToInt32(dosarDb.LawyerId);
-
-        var lawyer = await _context.Lawyers
-                                    .Where(l => l.Id == lawyerId)
-                                    .FirstOrDefaultAsync();
-
-
-        string color = lawyer?.Color ?? "#E0E0E0"; // Dacă avocatul nu este găsit, folosim o culoare implicită
-
+        if (dosarDb.LawyerId != null)
+        {
+          int lawyerId = dosarDb.LawyerId;  // Presupunem că LawyerId este un int
+          var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == lawyerId);
+        
+        // Dacă avocatul există și are o culoare validă, o folosim
+        if (lawyer != null && !string.IsNullOrWhiteSpace(lawyer.Color))
+          {
+            color = lawyer.Color;
+            _logger.LogInformation($"Lawyer Color for case {dosar.numar}: {color}");
+          }
+          else
+          {
+            _logger.LogWarning($"Lawyer for case {dosar.numar} does not have a color set.");
+          }
+        }
 
 
         var sedinteList = dosar.sedinte as IEnumerable<dynamic>;
@@ -212,6 +219,7 @@ namespace LawProject.Service.FileService
         }
       }
     }
+
 
 
     public async Task ProcessAllLocalFilesAsync()
