@@ -20,6 +20,9 @@ namespace LawProject.Models
 
     public string ClientType { get; set; } = "PF"; // Always "PF" for this type
 
+    //public ICollection<EventA> EventsA { get; set; }
+
+    //public ICollection<EventA> EventsC { get; set; }
 
     public virtual ICollection<ClientPFFile> ClientPFFiles { get; set; } = new List<ClientPFFile>() {
     };

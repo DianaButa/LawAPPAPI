@@ -1,3 +1,5 @@
+
+using LawProject.Enums;
 using LawProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -67,10 +69,10 @@ namespace LawProject.Database
           .HasOne(cj => cj.MyFile)
           .WithMany(m => m.ClientPJFiles)
           .HasForeignKey(cj => cj.MyFileId);
-    
 
-    modelBuilder.Entity<LawyerFile>()
-             .HasKey(lf => new { lf.LawyerId, lf.FileId });
+
+      modelBuilder.Entity<LawyerFile>()
+               .HasKey(lf => new { lf.LawyerId, lf.FileId });
 
       modelBuilder.Entity<LawyerFile>()
           .HasOne(lf => lf.Lawyer)
@@ -84,8 +86,32 @@ namespace LawProject.Database
           .HasForeignKey(lf => lf.FileId)
           .OnDelete(DeleteBehavior.NoAction);
 
+      //modelBuilder.Entity<EventA>()
+      //.Property(e => e.ClientType)
+      //.HasConversion(
+      //    v => v.ToString(),  // Enum -> String
+      //    v => Enum.Parse<ClientTypeEnum>(v)  // String -> Enum
+      //);
+
+      //// Definirea relațiilor
+      //modelBuilder.Entity<EventA>()
+      //    .HasOne(e => e.Lawyer)
+      //    .WithMany(l => l.EventsA)
+      //    .HasForeignKey(e => e.LawyerId);
+
+      //modelBuilder.Entity<EventA>()
+      //    .HasOne(e => e.ClientPF)
+      //    .WithMany(c => c.EventsA)
+      //    .HasForeignKey(e => e.ClientPFId)
+      //    .OnDelete(DeleteBehavior.SetNull);
+
+      //modelBuilder.Entity<EventA>()
+      //    .HasOne(e => e.ClientPJ)
+      //    .WithMany(c => c.EventsA)
+      //    .HasForeignKey(e => e.ClientPJId)
+      //    .OnDelete(DeleteBehavior.SetNull);
     }
   }
-}
+  }
 
 

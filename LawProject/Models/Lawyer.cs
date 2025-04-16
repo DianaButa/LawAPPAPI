@@ -10,6 +10,7 @@ namespace LawProject.Models
     public string Color { get; set; }
 
     public virtual ICollection<LawyerFile> LawyerFiles { get; set; } = new List<LawyerFile>();
+
   }
 }
 

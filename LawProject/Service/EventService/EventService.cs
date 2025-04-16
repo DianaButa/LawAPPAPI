@@ -2,99 +2,196 @@ using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 namespace LawProject.Service.EventService
 {
   public class EventService : IEventService
   {
     private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<EventService> _logger;
 
 
 
-    public EventService(ApplicationDbContext dbContext)
+    public EventService(ApplicationDbContext dbContext, ILogger<EventService> logger)
     {
       _dbContext = dbContext;
+      _logger = logger;
     }
 
-    // Adaugă un eveniment audiere
-    public async Task<EventADTO> AddEventAAsync(EventADTO eventADto)
+    private async Task<string> GetClientNameAsync(string clientType, int clientId)
     {
-      // Verifică dacă Time este valid
-      if (!TimeSpan.TryParse(eventADto.Time.ToString(), out TimeSpan parsedTime))
+      return clientType.ToUpper() switch
       {
-        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
-      }
+        "PF" => await _dbContext.ClientPFs
+                    .Where(c => c.Id == clientId)
+                    .Select(c => c.FirstName + " " + c.LastName)
+                    .FirstOrDefaultAsync() ?? "Necunoscut",
 
-      // Crează entitatea EventA și salvează Time ca TimeSpan
-      var eventEntity = new EventA
-      {
-        Date = eventADto.Date,
-        Time = parsedTime,  // Salvează ca TimeSpan, nu ca string
-        Description = eventADto.Description
+        "PJ" => await _dbContext.ClientPJs
+                    .Where(c => c.Id == clientId)
+                    .Select(c => c.CompanyName)
+                    .FirstOrDefaultAsync() ?? "Necunoscut",
+
+        _ => "Necunoscut"
       };
-
-      _dbContext.EventsA.Add(eventEntity);
-      await _dbContext.SaveChangesAsync();
-
-      // Atribuie Time ca TimeSpan, fără a-l transforma într-un string
-      eventADto.Id = eventEntity.Id;
-      eventADto.Time = eventEntity.Time;  // Păstrează TimeSpan, nu convertește în string
-      return eventADto;
     }
 
-
-
-
-    // Adaugă un eveniment consultanta
-    public async Task<EventCDTO> AddEventCAsync(EventCDTO eventCDto)
+    private async Task<(string? name, string color)> GetLawyerInfoAsync(int lawyerId)
     {
-      // Înlocuim secunda cu 00, dacă nu există
-      if (!TimeSpan.TryParse(eventCDto.Time + ":00", out TimeSpan parsedTime))
-      {
-        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
-      }
+      var lawyer = await _dbContext.Lawyers.FindAsync(lawyerId);
+      if (lawyer == null)
+        return ("Necunoscut", "#E0E0E0");
 
-      var eventEntity = new EventC
+      return (lawyer.LawyerName, string.IsNullOrWhiteSpace(lawyer.Color) ? "#E0E0E0" : lawyer.Color);
+    }
+
+    public async Task<EventADTO> AddEventAAsync(EventADTO dto)
+    {
+      if (dto.Date <= DateTime.MinValue)
+        throw new ArgumentException("Invalid date.");
+
+      if (!TimeSpan.TryParse(dto.Time.ToString(), out TimeSpan parsedTime))
+        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
+
+      var (lawyerName, color) = await GetLawyerInfoAsync(dto.LawyerId);
+      var clientName = await GetClientNameAsync(dto.ClientType, dto.ClientId);
+
+      var entity = new EventA
       {
-        Date = eventCDto.Date,
+        Date = dto.Date,
         Time = parsedTime,
-        Description = eventCDto.Description
+        Description = dto.Description,
+        ClientId = dto.ClientId,
+        ClientType = dto.ClientType.ToUpper(),
+        FileId = dto.FileId,
+        FileNumber = dto.FileNumber,
+        LawyerId = dto.LawyerId,
+        Color = color
       };
 
-      _dbContext.EventsC.Add(eventEntity);
+      _dbContext.EventsA.Add(entity);
       await _dbContext.SaveChangesAsync();
 
-      eventCDto.Id = eventEntity.Id;
-      eventCDto.Time = eventEntity.Time;  // Reformatăm ora ca HH:mm
-      return eventCDto;
+      return new EventADTO
+      {
+        Id = entity.Id,
+        Date = entity.Date,
+        Time = entity.Time.ToString(@"hh\:mm"),
+        Description = entity.Description,
+        ClientId = entity.ClientId,
+        ClientType = entity.ClientType,
+        ClientName = clientName,
+        FileId = entity.FileId,
+        FileNumber = entity.FileNumber,
+        LawyerId = entity.LawyerId,
+        LawyerName = lawyerName,
+        Color = color
+      };
     }
 
+    public async Task<EventCDTO> AddEventCAsync(EventCDTO dto)
+    {
+      if (dto.Date <= DateTime.MinValue)
+        throw new ArgumentException("Invalid date.");
 
-    // Obține toate evenimentele A din baza de date
+      if (!TimeSpan.TryParse(dto.Time.ToString(), out TimeSpan parsedTime))
+        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
+
+      var (lawyerName, color) = await GetLawyerInfoAsync(dto.LawyerId);
+      var clientName = await GetClientNameAsync(dto.ClientType, dto.ClientId);
+
+      var entity = new EventC
+      {
+        Date = dto.Date,
+        Time = parsedTime,
+        Description = dto.Description,
+        ClientId = dto.ClientId,
+        ClientType = dto.ClientType.ToUpper(),
+        FileId = dto.FileId,
+        FileNumber = dto.FileNumber,
+        LawyerId = dto.LawyerId,
+        Color = color
+      };
+
+      _dbContext.EventsC.Add(entity);
+      await _dbContext.SaveChangesAsync();
+
+      return new EventCDTO
+      {
+        Id = entity.Id,
+        Date = entity.Date,
+        Time = entity.Time.ToString(@"hh\:mm"),
+        Description = entity.Description,
+        ClientId = entity.ClientId,
+        ClientType = entity.ClientType,
+        ClientName = clientName,
+        FileId = entity.FileId,
+        FileNumber = entity.FileNumber,
+        LawyerId = entity.LawyerId,
+        LawyerName = lawyerName,
+        Color = color
+      };
+    }
+
     public async Task<List<EventADTO>> GetAllEventsAAsync()
     {
-      var events = await _dbContext.EventsA.ToListAsync();
-      return events.Select(e => new EventADTO
+      var events = await _dbContext.EventsA.Include(e => e.Lawyer).ToListAsync();
+
+      var result = new List<EventADTO>();
+
+      foreach (var e in events)
       {
-        Id = e.Id,
-        Date = e.Date,
-        Time = e.Time,
-        Description = e.Description
-      }).ToList();
+        var clientName = await GetClientNameAsync(e.ClientType, e.ClientId);
+
+        result.Add(new EventADTO
+        {
+          Id = e.Id,
+          Date = e.Date,
+          Time = e.Time.ToString(@"hh\:mm"),
+          Description = e.Description,
+          ClientId = e.ClientId,
+          ClientType = e.ClientType,
+          ClientName = clientName,
+          FileId = e.FileId,
+          FileNumber = e.FileNumber,
+          LawyerId = e.LawyerId,
+          LawyerName = e.Lawyer?.LawyerName ?? "Necunoscut",
+          Color = !string.IsNullOrEmpty(e.Lawyer?.Color) ? e.Lawyer.Color : "#E0E0E0"
+        });
+      }
+
+      return result;
     }
 
-    // Obține toate evenimentele C din baza de date
     public async Task<List<EventCDTO>> GetAllEventsCAsync()
     {
-      var events = await _dbContext.EventsC.ToListAsync();
-      return events.Select(e => new EventCDTO
+      var events = await _dbContext.EventsC.Include(e => e.Lawyer).ToListAsync();
+
+      var result = new List<EventCDTO>();
+
+      foreach (var e in events)
       {
-        Id = e.Id,
-        Date = e.Date,
-        Time = e.Time,
-        Description = e.Description
-      }).ToList();
+        var clientName = await GetClientNameAsync(e.ClientType, e.ClientId);
+
+        result.Add(new EventCDTO
+        {
+          Id = e.Id,
+          Date = e.Date,
+          Time = e.Time.ToString(@"hh\:mm"),
+          Description = e.Description,
+          ClientId = e.ClientId,
+          ClientType = e.ClientType,
+          ClientName = clientName,
+          FileId = e.FileId,
+          FileNumber = e.FileNumber,
+          LawyerId = e.LawyerId,
+          LawyerName = e.Lawyer?.LawyerName ?? "Necunoscut",
+          Color = !string.IsNullOrEmpty(e.Lawyer?.Color) ? e.Lawyer.Color : "#E0E0E0"
+        });
+      }
+
+      return result;
     }
   }
 }
-

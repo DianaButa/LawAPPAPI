@@ -1,4 +1,5 @@
 using LawProject.DTO;
+using LawProject.Models;
 using LawProject.Service.EventService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,67 +22,36 @@ namespace LawProject.Controllers
     public async Task<IActionResult> AddEventA([FromBody] EventADTO eventADto)
     {
       if (eventADto == null)
-      {
         return BadRequest("Invalid event data.");
-      }
 
-      if (eventADto.Date <= DateTime.MinValue)
+      try
       {
-        return BadRequest("Invalid date.");
+        var addedEvent = await _eventService.AddEventAAsync(eventADto);
+        return Ok(addedEvent);
       }
-
-      // Asigură-te că Time este valid, dar nu îl transformi încă în string
-      if (eventADto.Time == null || eventADto.Time == TimeSpan.Zero)
+      catch (ArgumentException ex)
       {
-        return BadRequest("Invalid time format. Use HH:mm.");
+        return BadRequest(ex.Message);
       }
-
-      // Trimitem TimeSpan în loc de string
-      var eventToSave = new EventADTO
-      {
-        Id = eventADto.Id,
-        Date = eventADto.Date,
-        Time = eventADto.Time,  // Pasăm TimeSpan direct
-        Description = eventADto.Description
-      };
-
-      var addedEventA = await _eventService.AddEventAAsync(eventToSave);
-      return Ok(addedEventA);
     }
 
-
-    // Adaugă un eveniment Consultanta
+    // POST: api/Events/Consultanta
     [HttpPost("Consultanta")]
     public async Task<IActionResult> AddEventC([FromBody] EventCDTO eventCDto)
     {
       if (eventCDto == null)
-      {
         return BadRequest("Invalid event data.");
-      }
 
-      if (eventCDto.Date <= DateTime.MinValue)
+      try
       {
-        return BadRequest("Invalid date.");
+        var addedEvent = await _eventService.AddEventCAsync(eventCDto);
+        return Ok(addedEvent);
       }
-
-      if (!TimeSpan.TryParse(eventCDto.Time.ToString(), out TimeSpan parsedTime)) 
+      catch (ArgumentException ex)
       {
-        return BadRequest("Invalid time format. Use HH:mm.");
+        return BadRequest(ex.Message);
       }
-
-      // Trimitem mai departe `parsedTime` în loc de string
-      var eventToSave = new EventCDTO
-      {
-        Id = eventCDto.Id,
-        Date = eventCDto.Date,
-        Time = parsedTime,
-        Description = eventCDto.Description
-      };
-
-      var addedEventC = await _eventService.AddEventCAsync(eventToSave);
-      return Ok(addedEventC);
     }
-
 
 
 

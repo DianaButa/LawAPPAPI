@@ -18,5 +18,9 @@ namespace LawProject.Models
     public string ClientType { get; set; } = "PJ"; // Always "PJ" for this type
 
     public virtual ICollection<ClientPJFile> ClientPJFiles { get; set; } = new List<ClientPJFile>();
+
+    //public ICollection<EventA> EventsA { get; set; }
+
+    //public ICollection<EventA> EventsC { get; set; }
   }
 }
