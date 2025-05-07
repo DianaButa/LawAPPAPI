@@ -7,6 +7,8 @@ namespace LawProject.Models
     // Asociere cu avocatul
     public int LawyerId { get; set; }
 
+    public string LawyerName { get; set; } = string.Empty;
+
     // Datele de început și de sfârșit (termen limită)
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
@@ -16,6 +18,7 @@ namespace LawProject.Models
 
     // Date despre client (PF sau PJ)
     public int ClientId { get; set; }
+    public string ClientName { get; set; } = string.Empty;
     public string ClientType { get; set; }
 
     public string FileNumber { get; set; }

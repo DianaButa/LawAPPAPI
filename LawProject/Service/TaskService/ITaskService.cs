@@ -14,6 +14,10 @@ namespace LawProject.Service.TaskService
     Task<IEnumerable<WorkTask>> GetTasksByLawyerIdAsync(int lawyerId);
 
 
+    Task<WorkTask> EditTaskAsync(int taskId, CreateTaskDto dto);
+    Task<bool> DeleteTaskAsync(int taskId);
+
+
 
   }
 }

@@ -21,6 +21,10 @@ namespace LawProject.Database
 
     public DbSet<Notes> Notes { get; set; }
 
+    public DbSet<Invoice> Invoices { get; set; }
+
+    public DbSet<Receipt> Receipts { get; set; }
+
     public DbSet<Lawyer> Lawyers { get; set; }
     public DbSet<EventA> EventsA { get; set; }
 

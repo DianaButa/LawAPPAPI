@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LawProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250407091256_relations")]
-    partial class relations
+    [Migration("20250507091346_ onorariurestant")]
+    partial class onorariurestant
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -132,6 +132,173 @@ namespace LawProject.Migrations
                     b.ToTable("ClientPJFiles");
                 });
 
+            modelBuilder.Entity("LawProject.Models.EventA", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LawyerId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Time")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LawyerId");
+
+                    b.ToTable("EventsA");
+                });
+
+            modelBuilder.Entity("LawProject.Models.EventC", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LawyerId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Time")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LawyerId");
+
+                    b.ToTable("EventsC");
+                });
+
+            modelBuilder.Entity("LawProject.Models.Invoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AdresaClient")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CNP")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CUI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Cantitate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DataEmitere")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataScadenta")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Denumire")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Moneda")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NumarFactura")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PretUnitar")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SumaFinala")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TVAProcent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invoices");
+                });
+
             modelBuilder.Entity("LawProject.Models.Lawyer", b =>
                 {
                     b.Property<int>("Id")
@@ -193,6 +360,13 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("DataScadenta")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Delegatie")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Details")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -201,9 +375,31 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Instanta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("LawyerId")
                         .IsRequired()
                         .HasColumnType("int");
+
+                    b.Property<string>("NumarContract")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Onorariu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnorariuRestant")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipDosar")
                         .IsRequired()
@@ -284,6 +480,38 @@ namespace LawProject.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("LawProject.Models.Receipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("DataChitanta")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NumarChitanta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NumarFactura")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("Receipts");
+                });
+
             modelBuilder.Entity("LawProject.Models.ScheduledEvent", b =>
                 {
                     b.Property<int>("Id")
@@ -344,6 +572,69 @@ namespace LawProject.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("LawProject.Models.WorkTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("HoursWorked")
+                        .HasColumnType("float");
+
+                    b.Property<int>("LawyerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LawyerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tasks");
+                });
+
             modelBuilder.Entity("LawProject.Models.ClientPFFile", b =>
                 {
                     b.HasOne("LawProject.Models.ClientPF", "ClientPF")
@@ -380,6 +671,28 @@ namespace LawProject.Migrations
                     b.Navigation("ClientPJ");
 
                     b.Navigation("MyFile");
+                });
+
+            modelBuilder.Entity("LawProject.Models.EventA", b =>
+                {
+                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
+                        .WithMany()
+                        .HasForeignKey("LawyerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lawyer");
+                });
+
+            modelBuilder.Entity("LawProject.Models.EventC", b =>
+                {
+                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
+                        .WithMany()
+                        .HasForeignKey("LawyerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lawyer");
                 });
 
             modelBuilder.Entity("LawProject.Models.LawyerFile", b =>
@@ -435,6 +748,17 @@ namespace LawProject.Migrations
                     b.Navigation("Dosar");
                 });
 
+            modelBuilder.Entity("LawProject.Models.Receipt", b =>
+                {
+                    b.HasOne("LawProject.Models.Invoice", "Factura")
+                        .WithMany("Receipts")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Factura");
+                });
+
             modelBuilder.Entity("LawProject.Models.ClientPF", b =>
                 {
                     b.Navigation("ClientPFFiles");
@@ -443,6 +767,11 @@ namespace LawProject.Migrations
             modelBuilder.Entity("LawProject.Models.ClientPJ", b =>
                 {
                     b.Navigation("ClientPJFiles");
+                });
+
+            modelBuilder.Entity("LawProject.Models.Invoice", b =>
+                {
+                    b.Navigation("Receipts");
                 });
 
             modelBuilder.Entity("LawProject.Models.Lawyer", b =>

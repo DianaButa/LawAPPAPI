@@ -51,8 +51,21 @@ namespace LawProject.Service.EventService
       if (dto.Date <= DateTime.MinValue)
         throw new ArgumentException("Invalid date.");
 
-      if (!TimeSpan.TryParse(dto.Time.ToString(), out TimeSpan parsedTime))
-        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
+      TimeSpan parsedTime;
+      var timeString = dto.Time?.ToString()?.Trim();
+
+      if (string.IsNullOrEmpty(timeString))
+        throw new ArgumentException("Time is required.");
+
+      if (TimeSpan.TryParseExact(timeString, new[] { @"h", @"hh", @"h\:mm", @"hh\:mm" }, null, out parsedTime))
+      {
+        // valid format, do nothing
+      }
+      else
+      {
+        throw new ArgumentException("Invalid time format. Expected format: HH or HH:mm");
+      }
+
 
       var (lawyerName, color) = await GetLawyerInfoAsync(dto.LawyerId);
       var clientName = await GetClientNameAsync(dto.ClientType, dto.ClientId);
@@ -95,8 +108,21 @@ namespace LawProject.Service.EventService
       if (dto.Date <= DateTime.MinValue)
         throw new ArgumentException("Invalid date.");
 
-      if (!TimeSpan.TryParse(dto.Time.ToString(), out TimeSpan parsedTime))
-        throw new ArgumentException("Invalid time format. Expected format: HH:mm");
+      TimeSpan parsedTime;
+      var timeString = dto.Time?.ToString()?.Trim();
+
+      if (string.IsNullOrEmpty(timeString))
+        throw new ArgumentException("Time is required.");
+
+      if (TimeSpan.TryParseExact(timeString, new[] { @"h", @"hh", @"h\:mm", @"hh\:mm" }, null, out parsedTime))
+      {
+        // valid format, do nothing
+      }
+      else
+      {
+        throw new ArgumentException("Invalid time format. Expected format: HH or HH:mm");
+      }
+
 
       var (lawyerName, color) = await GetLawyerInfoAsync(dto.LawyerId);
       var clientName = await GetClientNameAsync(dto.ClientType, dto.ClientId);

@@ -24,6 +24,23 @@ namespace LawProject.Models
 
     public string Details { get; set; } = string.Empty;
 
+    public string? Onorariu { get; set; } = string.Empty;
+
+    public string? OnorariuRestant { get; set; } = string.Empty;
+
+
+    public string NumarContract { get; set; } = string.Empty;
+
+    public string Delegatie { get; set; } = string.Empty;
+
+    public DateTime? DataScadenta { get; set; }
+
+    public string Status { get; set; }= "deschis";
+
+    public string Outcome { get; set; } = string.Empty;
+
+    public string Instanta {  get; set; }= string.Empty;
+
     public string TipDosar { get; set; } = string.Empty;
 
     public string CuloareCalendar { get; set; }

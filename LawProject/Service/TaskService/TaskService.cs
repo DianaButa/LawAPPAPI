@@ -57,15 +57,28 @@ namespace LawProject.Service.TaskService
         LawyerId = dto.LawyerId,
         StartDate = dto.StartDate,
         EndDate = dto.EndDate,
-        Status = "open",  // status implicit la crearea task‑ului
+        Status = "open",  
         ClientId = dto.ClientId,
         ClientType = dto.ClientType.ToUpper(),
+        
         Title = dto.Title,
         Description = dto.Description,
         FileId = dto.FileId,
         FileNumber = dto.FileNumber,
         Comment= dto.Comment,
       };
+
+      // Adăugarea numelui clientului (în funcție de tipul clientului)
+      if (dto.ClientType.ToUpper() == "PF")
+      {
+        var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == dto.ClientId);
+        workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
+      }
+      else if (dto.ClientType.ToUpper() == "PJ")
+      {
+        var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == dto.ClientId);
+        workTask.ClientName = clientPJ?.CompanyName;
+      }
 
       _context.Tasks.Add(workTask);
       await _context.SaveChangesAsync();
@@ -99,11 +112,30 @@ namespace LawProject.Service.TaskService
       return workTask;
     }
 
-
     public async Task<IEnumerable<WorkTask>> GetAllTasksAsync()
     {
-      return await _context.Tasks.ToListAsync();
+      var tasks = await _context.Tasks.ToListAsync();
+      foreach (var workTask in tasks)
+      {
+        // Adăugăm numele avocatului
+        var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == workTask.LawyerId);
+        workTask.LawyerName = lawyer?.LawyerName ?? string.Empty;
+
+        // Adăugăm numele clientului
+        if (workTask.ClientType.ToUpper() == "PF")
+        {
+          var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
+        }
+        else if (workTask.ClientType.ToUpper() == "PJ")
+        {
+          var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPJ?.CompanyName;
+        }
+      }
+      return tasks;
     }
+
 
     public async Task<IEnumerable<WorkTask>> GetTasksByLawyerIdAsync(int lawyerId)
     {
@@ -111,6 +143,67 @@ namespace LawProject.Service.TaskService
           .Where(t => t.LawyerId == lawyerId)
           .ToListAsync();
     }
+
+
+
+    public async Task<WorkTask> EditTaskAsync(int taskId, CreateTaskDto dto)
+    {
+      var workTask = await _context.Tasks.FindAsync(taskId);
+      if (workTask == null)
+      {
+        throw new ArgumentException("Taskul nu a fost găsit.", nameof(taskId));
+      }
+
+      // Actualizăm doar câmpurile necesare
+      workTask.Title = dto.Title;
+      workTask.Description = dto.Description;
+      workTask.StartDate = dto.StartDate;
+      workTask.EndDate = dto.EndDate;
+      workTask.FileId = dto.FileId;
+      workTask.FileNumber = dto.FileNumber;
+      workTask.Comment = dto.Comment;
+
+
+
+      // Adăugăm numele avocatului
+      var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == dto.LawyerId);
+      workTask.LawyerName = lawyer?.LawyerName ?? string.Empty;
+
+      // Adăugăm numele clientului
+      if (dto.ClientType.ToUpper() == "PF")
+      {
+        var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == dto.ClientId);
+        workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
+      }
+      else if (dto.ClientType.ToUpper() == "PJ")
+      {
+        var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == dto.ClientId);
+        workTask.ClientName = clientPJ?.CompanyName;
+      }
+
+      _context.Tasks.Update(workTask);
+      await _context.SaveChangesAsync();
+
+      _logger.LogInformation($"Taskul cu ID {taskId} a fost actualizat.");
+      return workTask;
+    }
+
+    public async Task<bool> DeleteTaskAsync(int taskId)
+    {
+      var workTask = await _context.Tasks.FindAsync(taskId);
+      if (workTask == null)
+      {
+        _logger.LogWarning($"Taskul cu ID {taskId} nu a fost găsit pentru ștergere.");
+        return false;
+      }
+
+      _context.Tasks.Remove(workTask);
+      await _context.SaveChangesAsync();
+
+      _logger.LogInformation($"Taskul cu ID {taskId} a fost șters.");
+      return true;
+    }
+
   }
 }
 

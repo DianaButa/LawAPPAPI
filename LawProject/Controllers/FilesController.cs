@@ -1,10 +1,12 @@
 using LawProject.Database;
 using LawProject.DTO;
+using LawProject.Models;
 using LawProject.Service;
 using LawProject.Service.EmailService;
 using LawProject.Service.FileService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
@@ -60,6 +62,26 @@ namespace LawProject.Controllers
         if (fileDetail == null)
         {
           return NotFound($"File with number {fileNumber} not found.");
+        }
+
+        return Ok(fileDetail);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+    [HttpGet("by-id/{id}")]
+    public async Task<IActionResult> GetFileById(int id)
+    {
+      try
+      {
+        var fileDetail = await _fileManagementService.GetFileByIdAsync(id);
+
+        if (fileDetail == null)
+        {
+          return NotFound($"File with ID {id} not found.");
         }
 
         return Ok(fileDetail);
@@ -166,6 +188,29 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpPut("close-file/{id}")]
+    public async Task<IActionResult> CloseFileAsync(int id, [FromBody] CloseFileDto closeFileDto)
+    {
+      // Căutăm dosarul în baza de date
+      var file = await _context.Files.FindAsync(id);
+
+      if (file == null)
+      {
+        return NotFound(new { Message = "Fișierul nu a fost găsit." });
+      }
+
+      // Actualizăm statusul dosarului și outcome-ul
+      file.Status = "închis";  // Setăm statusul la "închis"
+      file.Outcome = closeFileDto.Outcome;  // Setăm outcome-ul
+
+      // Salvăm modificările
+      await _context.SaveChangesAsync();
+
+
+      return Ok(new { Message = "Fișierul a fost închis cu succes." });
+    }
+
+
     // Ștergerea unui fișier existent - DELETE
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFile(int id)
@@ -236,6 +281,30 @@ namespace LawProject.Controllers
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
+
+    [HttpGet("scadenta")]
+
+    public async Task<IActionResult> GetFilesByDueDate()
+    {
+      try
+      {
+     
+        var filesDue = await _fileManagementService.GetFilesByDueDateAsync();
+
+        if (filesDue == null || !filesDue.Any())
+        {
+          return NotFound("Nu au fost găsite dosare cu termenul de scadență de la data curentă.");
+        }
+
+        return Ok(filesDue);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea dosarelor: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
 
 
 

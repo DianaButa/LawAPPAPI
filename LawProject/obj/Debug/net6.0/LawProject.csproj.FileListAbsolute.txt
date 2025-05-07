@@ -168,6 +168,19 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Hangfire.Core.
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Hangfire.NetCore.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Hangfire.SqlServer.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Humanizer.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.barcodes.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.bouncy-castle-connector.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.forms.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.io.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.kernel.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.layout.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.pdfa.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.pdfua.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.sign.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.styledxmlparser.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.svg.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.commons.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itextsharp.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\MailKit.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.Connections.Abstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
@@ -175,6 +188,7 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspN
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Common.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.DotNet.PlatformAbstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Abstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll
@@ -182,6 +196,7 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Enti
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.SqlServer.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.DependencyModel.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.Features.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Extensions.FileProviders.Abstractions.dll
@@ -203,6 +218,12 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Open
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\MimeKit.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.Charting.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.Quality.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.Snippets.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.System.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.WPFonts.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\PdfSharp.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\SendGrid.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\StarkbankEcdsa.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Swashbuckle.AspNetCore.Swagger.dll
@@ -248,6 +269,8 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\sv\Hangfire.Co
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\tr-TR\Hangfire.Core.resources.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\zh-TW\Hangfire.Core.resources.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\zh\Hangfire.Core.resources.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\de\PdfSharp.Charting.resources.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\de\PdfSharp.resources.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\cs\System.Private.ServiceModel.resources.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\de\System.Private.ServiceModel.resources.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\es\System.Private.ServiceModel.resources.dll

@@ -90,6 +90,10 @@
               "target": "Package",
               "version": "[6.0.0, )"
             },
+            "PDFsharp": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            },
             "SendGrid": {
               "target": "Package",
               "version": "[9.29.3, )"
@@ -117,6 +121,14 @@
             "System.ServiceModel.Security": {
               "target": "Package",
               "version": "[4.10.*, )"
+            },
+            "iTextSharp": {
+              "target": "Package",
+              "version": "[5.5.13.4, )"
+            },
+            "itext7": {
+              "target": "Package",
+              "version": "[9.1.0, )"
             }
           },
           "imports": [

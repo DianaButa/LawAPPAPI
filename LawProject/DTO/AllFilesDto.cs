@@ -10,6 +10,19 @@ namespace LawProject.DTO
     public string Email { get; set; } = string.Empty;
     public string TipDosar { get; set; } = string.Empty;
 
+    public string Status {  get; set; } = string.Empty;
+
+    public string Onorariu { get; set; } = string.Empty;
+
+    public string OnorariuRestant {  get; set; } =string.Empty;
+
+    public string NumarContract { get; set; } = string.Empty;
+
+    public string Delegatie { get; set; } = string.Empty;
+
+    public DateTime? DataScadenta { get; set; }
+
+    public string Instanta {  get; set; } = string.Empty;
     public int? LawyerId {  get; set; } 
     public string LawyerName { get; set; } = string.Empty;
 

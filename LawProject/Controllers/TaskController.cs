@@ -91,5 +91,48 @@ namespace LawProject.Controllers
         return BadRequest(ex.Message);
       }
     }
+
+
+
+    [HttpPut("edit/{id}")]
+    public async Task<IActionResult> EditTask(int id, [FromBody] CreateTaskDto dto)
+    {
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(ModelState);
+      }
+
+      try
+      {
+        var updatedTask = await _taskService.EditTaskAsync(id, dto);
+        return Ok(updatedTask);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la actualizarea task-ului: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTask(int id)
+    {
+      try
+      {
+        var success = await _taskService.DeleteTaskAsync(id);
+        if (!success)
+        {
+          return NotFound($"Taskul cu ID {id} nu a fost găsit.");
+        }
+
+        return Ok($"Taskul cu ID {id} a fost șters.");
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la ștergerea task-ului: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
   }
 }

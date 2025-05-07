@@ -10,10 +10,13 @@ using LawProject.Service.ClientService;
 using LawProject.Service.EmailService;
 using LawProject.Service.EventService;
 using LawProject.Service.FileService;
+using LawProject.Service.InvoiceSerices;
 using LawProject.Service.Lawyer;
 using LawProject.Service.Notifications;
+using LawProject.Service.ReceiptService;
 using LawProject.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp.Charting;
 using ServiceReference1;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,8 +49,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<FileManagementService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<FileToCalendarService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -93,9 +98,9 @@ app.MapControllers();
 app.UseHangfireDashboard("/hangfire");
 app.UseHangfireServer();
 
-// Adăugăm un job recurent care rulează la fiecare 4 ore pentru a procesa dosarele
+// Adăugăm un job recurent care rulează la fiecare 1 ore pentru a procesa dosarele
 RecurringJob.AddOrUpdate<FileToCalendarService>(
-    "process-all-files-periodically",                // Nume job
-    service => service.ProcessAllFilesAsync(),       // Metodă care procesează toate dosarele
-    Cron.HourInterval(4));
+    "process-all-files-periodically",                
+    service => service.ProcessAllFilesAsync(),     
+    Cron.HourInterval(1));
 app.Run();
