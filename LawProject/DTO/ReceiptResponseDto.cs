@@ -6,6 +6,8 @@ namespace LawProject.DTO
     public DateTime DataChitanta { get; set; }
     public decimal Suma { get; set; }
 
+    public string Moneda { get; set; }
+
     public string NumarFactura { get; set; }
     public DateTime DataFactura { get; set; }
 

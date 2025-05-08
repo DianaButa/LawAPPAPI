@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using System.ServiceModel;
+using System.Globalization;
 
 namespace LawProject.Service.InvoiceSerices
 {
@@ -65,7 +66,7 @@ namespace LawProject.Service.InvoiceSerices
         ClientType = clientType,
         ClientName = clientName,
         AdresaClient = adresaClient,
-        CNP = cnp,  
+        CNP = cnp,
         CUI = cui,
 
         Denumire = dto.Denumire,
@@ -89,38 +90,43 @@ namespace LawProject.Service.InvoiceSerices
         if (file != null)
         {
           var culture = System.Globalization.CultureInfo.InvariantCulture;
+          string onorariuRestantStr = file.OnorariuRestant?.Trim();
 
-          // Îndepărtăm cuvintele "Lei" sau orice alt text din OnorariuRestant
-          string onorariuRestantStr = file.OnorariuRestant?.Replace("Lei", "").Trim();
+          // Formatul așteptat: "1200.50 RON" sau "800 EUR"
+          var parts = onorariuRestantStr?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+          if (parts == null || parts.Length != 2)
+            throw new InvalidOperationException("OnorariuRestant are un format invalid. Exemplu valid: '1200 RON'.");
 
-          // Verificăm dacă OnorariuRestant este un număr valid
-          if (decimal.TryParse(onorariuRestantStr, System.Globalization.NumberStyles.Any, culture, out decimal restant) &&
-              decimal.TryParse(dto.SumaFinala.ToString(), out decimal sumaFactura))
+          if (!decimal.TryParse(parts[0], NumberStyles.Any, culture, out decimal restant))
+            throw new InvalidOperationException("Valoarea OnorariuRestant nu este un număr valid.");
+
+          string monedaRestant = parts[1].ToUpper();
+          string monedaFactura = dto.Moneda.ToUpper();
+
+          if (monedaRestant != monedaFactura)
+            throw new InvalidOperationException($"Moneda facturii ({monedaFactura}) diferă de moneda restantă ({monedaRestant}).");
+
+          decimal sumaFactura = dto.SumaFinala;
+          decimal nouRestant = restant - sumaFactura;
+
+          if (nouRestant <= 0)
           {
-            decimal nouRestant = restant - sumaFactura;
-
-            if (nouRestant <= 0)
-            {
-              file.OnorariuRestant = "0";
-              file.Status = "achitat";
-            }
-            else
-            {
-              file.OnorariuRestant = nouRestant.ToString("0.##", culture);
-            }
-
-            _dbContext.Files.Update(file);
+            file.OnorariuRestant = $"0 {monedaRestant}";
+            file.Status = "achitat";
           }
           else
           {
-            throw new InvalidOperationException("OnorariuRestant nu este un număr valid.");
+            file.OnorariuRestant = nouRestant.ToString("0.##", culture) + $" {monedaRestant}";
           }
+
+          _dbContext.Files.Update(file);
         }
       }
 
       await _dbContext.SaveChangesAsync();
       return invoice;
     }
+  
 
     private string GenerateInvoiceNumber()
     {
@@ -139,7 +145,7 @@ namespace LawProject.Service.InvoiceSerices
     public async Task<List<InvoiceDto>> GetAllInvoicesAsync()
     {
       var invoices = await _dbContext.Invoices
-          .Include(i => i.Receipts) // important!
+          .Include(i => i.Receipts) 
           .ToListAsync();
 
       var result = invoices.Select(invoice =>

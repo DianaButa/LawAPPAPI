@@ -1,6 +1,6 @@
 namespace LawProject.DTO
 {
-  public class ClientPFDto
+  public class DailyEventDto
   {
 
     public int Id { get; set; }

@@ -4,9 +4,9 @@ namespace LawProject.Service.ClientService
 {
   public interface IClientService
   {
-    Task<IEnumerable<ClientPFDto>> GetAllPFAsync();
+    Task<IEnumerable<DailyEventDto>> GetAllPFAsync();
     Task<IEnumerable<ClientPJDto>> GetAllPJAsync();
-    Task AddClientPF(ClientPFDto clientDTO);
+    Task AddClientPF(DailyEventDto clientDTO);
     Task AddClientPJ(ClientPJDto clientDTO);
   }
 }

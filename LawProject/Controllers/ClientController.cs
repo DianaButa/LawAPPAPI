@@ -21,7 +21,7 @@ namespace LawProject.Controllers
 
     // Obține persoanele fizice
     [HttpGet("persoane-fizice")]
-    public async Task<ActionResult<IEnumerable<ClientPFDto>>> GetClientPF()
+    public async Task<ActionResult<IEnumerable<DailyEventDto>>> GetClientPF()
     {
       var clients = await _clientService.GetAllPFAsync();
       if (clients == null || !clients.Any())
@@ -45,7 +45,7 @@ namespace LawProject.Controllers
 
     // Adăugare client persoană fizică
     [HttpPost("persoane-fizice")]
-    public async Task<IActionResult> AddClientPF(ClientPFDto clientDto)
+    public async Task<IActionResult> AddClientPF(DailyEventDto clientDto)
     {
       try
       {

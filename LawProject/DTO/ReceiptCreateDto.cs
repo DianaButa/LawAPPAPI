@@ -6,5 +6,6 @@ namespace LawProject.DTO
     public int InvoiceId { get; set; }
 
     public decimal Suma { get; set; }
+    public string Moneda { get; set; }
   }
 }

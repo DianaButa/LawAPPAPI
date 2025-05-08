@@ -7,6 +7,8 @@ namespace LawProject.Models
     public DateTime DataChitanta { get; set; } = DateTime.Now;
 
     public decimal Suma { get; set; }
+    public string Moneda { get; set; }
+
 
     // Relație cu factura
 

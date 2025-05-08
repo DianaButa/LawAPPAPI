@@ -33,7 +33,8 @@ namespace LawProject.Service.ReceiptService
         Factura = factura,
         NumarChitanta = numarChitanta,
         DataChitanta = DateTime.Now,
-        Suma = dto.Suma
+        Suma = dto.Suma,
+        Moneda= dto.Moneda
      };
 
       _context.Receipts.Add(chitanta);
@@ -45,6 +46,7 @@ namespace LawProject.Service.ReceiptService
           NumarChitanta = chitanta.NumarChitanta,
          DataChitanta = chitanta.DataChitanta,
           Suma = chitanta.Suma,
+          Moneda=chitanta.Moneda,
           NumarFactura = factura.NumarFactura,
           DataFactura = factura.DataEmitere ?? DateTime.MinValue,
           ClientType = factura.ClientType,
@@ -86,6 +88,7 @@ namespace LawProject.Service.ReceiptService
         NumarChitanta = ch.NumarChitanta,
         DataChitanta = ch.DataChitanta,
         Suma = ch.Suma,
+        Moneda = ch.Moneda,
         NumarFactura = ch.Factura.NumarFactura,
        DataFactura = ch.Factura.DataEmitere ?? DateTime.MinValue,
        ClientType = ch.Factura.ClientType,

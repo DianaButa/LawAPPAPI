@@ -22,11 +22,13 @@ namespace LawProject.Models
     public int? ClientPJId { get; set; }
     public virtual ClientPJ ClientPJ { get; set; }
 
-    public string Details { get; set; } = string.Empty;
+    public string? Details { get; set; } = string.Empty;
 
     public string? Onorariu { get; set; } = string.Empty;
 
     public string? OnorariuRestant { get; set; } = string.Empty;
+
+    public string Moneda {  get; set; } = string.Empty;
 
 
     public string NumarContract { get; set; } = string.Empty;
@@ -39,7 +41,7 @@ namespace LawProject.Models
 
     public string Outcome { get; set; } = string.Empty;
 
-    public string Instanta {  get; set; }= string.Empty;
+    public string? Instanta {  get; set; }= string.Empty;
 
     public string TipDosar { get; set; } = string.Empty;
 

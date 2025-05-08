@@ -14,10 +14,10 @@ namespace LawProject.Service.ClientService
       _context = context;
     }
 
-    public async Task<IEnumerable<ClientPFDto>> GetAllPFAsync()
+    public async Task<IEnumerable<DailyEventDto>> GetAllPFAsync()
     {
       var clients = await _context.ClientPFs.ToListAsync();  // Adaptează la contextul tău
-      return clients.Select(client => new ClientPFDto
+      return clients.Select(client => new DailyEventDto
       {
         Id = client.Id,
         FirstName = client.FirstName,
@@ -45,7 +45,7 @@ namespace LawProject.Service.ClientService
     }
 
     // Adăugare client persoană fizică
-    public async Task AddClientPF(ClientPFDto clientDto)
+    public async Task AddClientPF(DailyEventDto clientDto)
     {
       var newClient = new ClientPF
       {

@@ -29,7 +29,7 @@ namespace LawProject.DTO
     public string? NumarFactura { get; set; } 
 
     public int? FileId { get; set; }
-    public string FileNumber { get; set; }
+    public string? FileNumber { get; set; }
 
     public decimal SumaPlatita { get; set; }
     public decimal SumaNeachitata { get; set; }

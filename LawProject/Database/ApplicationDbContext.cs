@@ -11,6 +11,12 @@ namespace LawProject.Database
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+
+    public DbSet<Raport> Rapoarte { get; set; }
+
+    public DbSet<DailyEvents> DailyEvents { get; set; }
+    public DbSet<RaportTask> RaportTaskuri { get; set; }
+
     public DbSet<ClientPF> ClientPFs { get; set; }
 
     public DbSet<ClientPJ> ClientPJs { get; set; }
@@ -50,6 +56,7 @@ namespace LawProject.Database
       modelBuilder.Entity<ClientPFFile>()
           .HasKey(cp => new { cp.ClientPFId, cp.MyFileId });
 
+
       modelBuilder.Entity<ClientPFFile>()
           .HasOne(cp => cp.ClientPF)
           .WithMany(c => c.ClientPFFiles)
@@ -82,13 +89,19 @@ namespace LawProject.Database
           .HasOne(lf => lf.Lawyer)
           .WithMany(l => l.LawyerFiles)
           .HasForeignKey(lf => lf.LawyerId)
-          .OnDelete(DeleteBehavior.NoAction); // Adăugat NO ACTION pentru a evita conflictele de cascade delete
+          .OnDelete(DeleteBehavior.NoAction); 
 
       modelBuilder.Entity<LawyerFile>()
           .HasOne(lf => lf.File)
           .WithMany(f => f.LawyerFiles)
           .HasForeignKey(lf => lf.FileId)
           .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<Raport>()
+            .HasMany(r => r.TaskuriLucrate)
+            .WithOne(rt => rt.Raport)
+            .HasForeignKey(rt => rt.RaportId)
+            .OnDelete(DeleteBehavior.Cascade);
 
       //modelBuilder.Entity<EventA>()
       //.Property(e => e.ClientType)

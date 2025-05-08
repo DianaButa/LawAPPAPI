@@ -4,6 +4,7 @@ using LawProject.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LawProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507115035_files")]
+    partial class files
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,42 +130,6 @@ namespace LawProject.Migrations
                     b.HasIndex("MyFileId");
 
                     b.ToTable("ClientPJFiles");
-                });
-
-            modelBuilder.Entity("LawProject.Models.DailyEvents", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("AllocatedHours")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Descriere")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Institutie")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LawyerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DailyEvents");
                 });
 
             modelBuilder.Entity("LawProject.Models.EventA", b =>
@@ -401,23 +367,13 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FileNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Instanta")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LawyerId")
                         .IsRequired()
                         .HasColumnType("int");
-
-                    b.Property<string>("Moneda")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NumarContract")
                         .IsRequired()
@@ -516,92 +472,6 @@ namespace LawProject.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("LawProject.Models.Raport", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ClientName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ClientPFId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClientPJId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ClientType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DataRaport")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("FileId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FileNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LawyerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LawyerName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("OreDeplasare")
-                        .HasColumnType("float");
-
-                    b.Property<double>("OreStudiu")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("WorkTaskId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientPFId");
-
-                    b.HasIndex("ClientPJId");
-
-                    b.HasIndex("LawyerId");
-
-                    b.HasIndex("WorkTaskId");
-
-                    b.ToTable("Rapoarte");
-                });
-
-            modelBuilder.Entity("LawProject.Models.RaportTask", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<double>("OreLucrate")
-                        .HasColumnType("float");
-
-                    b.Property<int>("RaportId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkTaskId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RaportId");
-
-                    b.HasIndex("WorkTaskId");
-
-                    b.ToTable("RaportTaskuri");
-                });
-
             modelBuilder.Entity("LawProject.Models.Receipt", b =>
                 {
                     b.Property<int>("Id")
@@ -615,10 +485,6 @@ namespace LawProject.Migrations
 
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Moneda")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NumarChitanta")
                         .IsRequired()
@@ -874,54 +740,6 @@ namespace LawProject.Migrations
                     b.Navigation("Dosar");
                 });
 
-            modelBuilder.Entity("LawProject.Models.Raport", b =>
-                {
-                    b.HasOne("LawProject.Models.ClientPF", "ClientPF")
-                        .WithMany()
-                        .HasForeignKey("ClientPFId");
-
-                    b.HasOne("LawProject.Models.ClientPJ", "ClientPJ")
-                        .WithMany()
-                        .HasForeignKey("ClientPJId");
-
-                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
-                        .WithMany()
-                        .HasForeignKey("LawyerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LawProject.Models.WorkTask", "WorkTask")
-                        .WithMany()
-                        .HasForeignKey("WorkTaskId");
-
-                    b.Navigation("ClientPF");
-
-                    b.Navigation("ClientPJ");
-
-                    b.Navigation("Lawyer");
-
-                    b.Navigation("WorkTask");
-                });
-
-            modelBuilder.Entity("LawProject.Models.RaportTask", b =>
-                {
-                    b.HasOne("LawProject.Models.Raport", "Raport")
-                        .WithMany("TaskuriLucrate")
-                        .HasForeignKey("RaportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LawProject.Models.WorkTask", "WorkTask")
-                        .WithMany()
-                        .HasForeignKey("WorkTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Raport");
-
-                    b.Navigation("WorkTask");
-                });
-
             modelBuilder.Entity("LawProject.Models.Receipt", b =>
                 {
                     b.HasOne("LawProject.Models.Invoice", "Factura")
@@ -962,11 +780,6 @@ namespace LawProject.Migrations
                     b.Navigation("LawyerFiles");
 
                     b.Navigation("Notes");
-                });
-
-            modelBuilder.Entity("LawProject.Models.Raport", b =>
-                {
-                    b.Navigation("TaskuriLucrate");
                 });
 #pragma warning restore 612, 618
         }

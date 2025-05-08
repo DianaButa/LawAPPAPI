@@ -6,6 +6,9 @@ namespace LawProject.DTO
     public string NumarVechi { get; set; }
     public DateTime Data { get; set; }
     public string Institutie { get; set; }
+    public string Moneda { get; set; }
+
+    public string ObiectDosar {  get; set; }
     public string Departament { get; set; }
     public string CategorieCaz { get; set; }
     public string StadiuProcesual { get; set; }

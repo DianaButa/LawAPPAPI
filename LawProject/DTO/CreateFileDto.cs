@@ -14,16 +14,15 @@ namespace LawProject.DTO
 
     public string ClientType { get; set; }
 
-    // ClientName is optional as it will be set automatically from the client's first and last name
     public string? ClientName { get; set; }
 
-    public string Details { get; set; } = string.Empty;
+    public string? Details { get; set; } = string.Empty;
 
-
+    public string Moneda { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 
-    public string Instanta { get; set; } = string.Empty;
+    public string? Instanta { get; set; } = string.Empty;
 
     public string Onorariu {  get; set; } = string.Empty;
 
