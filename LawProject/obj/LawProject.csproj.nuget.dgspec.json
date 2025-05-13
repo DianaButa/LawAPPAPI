@@ -44,6 +44,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "DocumentFormat.OpenXml": {
+              "target": "Package",
+              "version": "[3.3.0, )"
+            },
             "Hangfire.AspNetCore": {
               "target": "Package",
               "version": "[1.8.18, )"

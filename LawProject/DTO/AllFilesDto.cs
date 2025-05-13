@@ -1,3 +1,6 @@
+
+using Newtonsoft.Json;
+
 namespace LawProject.DTO
 {
   public class AllFilesDto
@@ -13,6 +16,8 @@ namespace LawProject.DTO
     public string Status {  get; set; } = string.Empty;
 
     public string Onorariu { get; set; } = string.Empty;
+
+    public string Source { get; set; } = string.Empty;
 
     public string OnorariuRestant {  get; set; } =string.Empty;
 
@@ -37,8 +42,19 @@ namespace LawProject.DTO
     public string Departament { get; set; }
     public string CategorieCaz { get; set; }
     public string StadiuProcesual { get; set; }
+
+
+    public string OraTermen { get; set; } = string.Empty;
+    public string Solutie { get; set; } = string.Empty;
+    public string DetaliiSolutie { get; set; } = string.Empty;
     public List<ParteDTO> Parti { get; set; }
     public List<SedintaDTO> Sedinte { get; set; }
     public List<CaleAtacDTO> CaiAtac { get; set; }
+
+    public List<TermeneDTO> Termene { get; set; }
+
+    public List<SedintaIccjDto> SedinteIccj { get; set; } = new List<SedintaIccjDto>();
+
+
   }
 }

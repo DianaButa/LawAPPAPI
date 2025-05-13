@@ -137,6 +137,7 @@ namespace LawProject.Service.EventService
         FileId = dto.FileId,
         FileNumber = dto.FileNumber,
         LawyerId = dto.LawyerId,
+        IsReported= dto.IsReported,
         Color = color
       };
 
@@ -154,6 +155,7 @@ namespace LawProject.Service.EventService
         ClientName = clientName,
         FileId = entity.FileId,
         FileNumber = entity.FileNumber,
+        IsReported = entity.IsReported,
         LawyerId = entity.LawyerId,
         LawyerName = lawyerName,
         Color = color
@@ -180,6 +182,7 @@ namespace LawProject.Service.EventService
           ClientType = e.ClientType,
           ClientName = clientName,
           FileId = e.FileId,
+          IsReported =e.IsReported,
           FileNumber = e.FileNumber,
           LawyerId = e.LawyerId,
           LawyerName = e.Lawyer?.LawyerName ?? "Necunoscut",
@@ -210,6 +213,7 @@ namespace LawProject.Service.EventService
           ClientType = e.ClientType,
           ClientName = clientName,
           FileId = e.FileId,
+          IsReported = e.IsReported,
           FileNumber = e.FileNumber,
           LawyerId = e.LawyerId,
           LawyerName = e.Lawyer?.LawyerName ?? "Necunoscut",

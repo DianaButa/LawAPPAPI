@@ -11,11 +11,14 @@ namespace LawProject.Models
 
 
     public DateTime EndTime { get; set; }
-    public string TipDosar { get; set; } // Penal / Civil
+    public string TipDosar { get; set; } 
     public string Description { get; set; }
     public string ClientName { get; set; }
-    public string Color { get; set; } // Culoarea pentru evenime
+    public string Color { get; set; } 
+    public bool IsReported { get; set; }
 
-  
+    public string EventType { get; set; } = "S";
+
+
   }
 }

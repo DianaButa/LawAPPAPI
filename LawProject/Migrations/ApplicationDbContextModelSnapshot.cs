@@ -130,6 +130,50 @@ namespace LawProject.Migrations
                     b.ToTable("ClientPJFiles");
                 });
 
+            modelBuilder.Entity("LawProject.Models.Contract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("CNP")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CUI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientAdress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClientName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Obiect")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Onorariu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Scadenta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Contracts");
+                });
+
             modelBuilder.Entity("LawProject.Models.DailyEvents", b =>
                 {
                     b.Property<int>("Id")
@@ -152,6 +196,12 @@ namespace LawProject.Migrations
                     b.Property<string>("Descriere")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("EventAId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EventCId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FileNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -161,7 +211,12 @@ namespace LawProject.Migrations
                     b.Property<int>("LawyerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ScheduledEventId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("LawyerId");
 
                     b.ToTable("DailyEvents");
                 });
@@ -202,6 +257,9 @@ namespace LawProject.Migrations
                     b.Property<string>("FileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsReported")
+                        .HasColumnType("bit");
 
                     b.Property<int>("LawyerId")
                         .HasColumnType("int");
@@ -252,6 +310,9 @@ namespace LawProject.Migrations
                     b.Property<string>("FileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsReported")
+                        .HasColumnType("bit");
 
                     b.Property<int>("LawyerId")
                         .HasColumnType("int");
@@ -431,6 +492,9 @@ namespace LawProject.Migrations
 
                     b.Property<string>("Outcome")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Source")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -661,9 +725,16 @@ namespace LawProject.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsReported")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -797,6 +868,17 @@ namespace LawProject.Migrations
                     b.Navigation("ClientPJ");
 
                     b.Navigation("MyFile");
+                });
+
+            modelBuilder.Entity("LawProject.Models.DailyEvents", b =>
+                {
+                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
+                        .WithMany()
+                        .HasForeignKey("LawyerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lawyer");
                 });
 
             modelBuilder.Entity("LawProject.Models.EventA", b =>

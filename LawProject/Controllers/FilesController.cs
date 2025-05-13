@@ -4,6 +4,7 @@ using LawProject.Models;
 using LawProject.Service;
 using LawProject.Service.EmailService;
 using LawProject.Service.FileService;
+using LawProject.Service.ICCJ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +24,16 @@ namespace LawProject.Controllers
     private readonly ILogger<FilesController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
+    private readonly IIccjService _ccjService;
     public FilesController(FileManagementService fileManagementService, FileToCalendarService fileToCalendarService, MyQueryService queryService,
-                                ILogger<FilesController> logger, IEmailService emailService, ApplicationDbContext _context)
+                                ILogger<FilesController> logger, IEmailService emailService, ApplicationDbContext _context, IIccjService iccjService)
     {
       _fileManagementService = fileManagementService;
       _fileToCalendarService = fileToCalendarService;
       _queryService = queryService;
       _logger = logger;
       _context = _context;
+      _ccjService = iccjService;
       _emailService = emailService;
 
     }
@@ -72,6 +75,44 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("iccj/{fileNumber}")]
+    public async Task<IActionResult> GetIccjtFileByNumber(string fileNumber)
+    {
+      try
+      {
+        // Decodifică numărul de dosar din URL
+        fileNumber = Uri.UnescapeDataString(fileNumber);
+
+        // Căutăm dosarele folosind IccjService
+        var dosare = await _ccjService.CautareDosareAsync(fileNumber);
+
+        // Verifică dacă există dosare returnate
+        if (dosare == null || !dosare.Any())
+        {
+          _logger.LogWarning($"No case details found for file number: {fileNumber}");
+          return NotFound($"No case details found for file number: {fileNumber}");
+        }
+
+        // Returnează toate datele despre dosar (fără mapare detaliată)
+        return Ok(dosare);
+      }
+      catch (Exception ex)
+      {
+        // Loghează eroarea
+        _logger.LogError(ex, "An error occurred while retrieving the file details.");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+
+
+
+
+
+
+
+
+
     [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetFileById(int id)
     {
@@ -107,15 +148,28 @@ namespace LawProject.Controllers
         // Adaugă dosarul în baza de date
         await _fileManagementService.AddFileAsync(dto);
 
-        // După ce dosarul este adăugat, verifică dacă există ședințe pentru acesta
-        _logger.LogInformation($"Checking for hearings for newly added file: {dto.FileNumber}");
-
-        // Procesarea ședințelor imediat după adăugare
-        await _fileToCalendarService.ProcessSingleFileAsync(dto.FileNumber);
-
-        // Trimite email de confirmare
-        try
+        // După ce dosarul este adăugat, verifică sursa dosarului
+        if (dto.Source == "ICCJ")
         {
+          // Dacă sursa este ICCJ, procesează dosarul pentru ICCJ
+          _logger.LogInformation($"Processing ICCJ file {dto.FileNumber}");
+          await _fileToCalendarService.ProcessSingleFileIccjAsync(dto.FileNumber);
+        }
+        else if (dto.Source == "JUST")
+        {
+          // Dacă sursa este JUST, procesează dosarul pentru Justiție
+          _logger.LogInformation($"Processing JUST file {dto.FileNumber}");
+          await _fileToCalendarService.ProcessSingleFileAsync(dto.FileNumber);
+        }
+        else
+        {
+          // Dacă sursa este none, doar salvează dosarul și trimite notificările
+          _logger.LogInformation($"No specific source. Saving file {dto.FileNumber} without additional processing.");
+        }
+
+          // Trimite email de confirmare
+          try
+          {
           string email = dto.Email;
           string name = dto.ClientName;
 
