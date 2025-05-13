@@ -1,6 +1,8 @@
 using LawProject.Database;
+using LawProject.DTO;
 using LawProject.Models;
 using LawProject.Service.EmailService;
+using LawProject.Service.ICCJ;
 using LawProject.Service.Notifications;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +14,13 @@ namespace LawProject.Service.FileService
     private readonly ILogger<FileToCalendarService> _logger;
     private readonly FileManagementService _fileManagementService;
     private readonly MyQueryService _queryService;
-    
+  
+
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly INotificationService _notificationService;
     private readonly IEmailService _emailService;
+    private readonly IIccjService _ccjService;
 
     public FileToCalendarService(
     
@@ -25,6 +29,7 @@ namespace LawProject.Service.FileService
         MyQueryService queryService,
         IEmailService emailService,
         ApplicationDbContext context,
+        IIccjService iccjService,
         IConfiguration configuration,
         INotificationService notificationService)
     {
@@ -34,6 +39,7 @@ namespace LawProject.Service.FileService
       _queryService = queryService;
       _emailService = emailService;
       _context = context;
+      _ccjService = iccjService;
       _configuration = configuration;
       _notificationService = notificationService;
     }
@@ -41,7 +47,7 @@ namespace LawProject.Service.FileService
 
 
 
-    // Procesarea unui singur dosar (pentru verificare imediată la adăugare)
+    // Procesarea unui singur dosar Just (pentru verificare imediată la adăugare)
     public async Task ProcessSingleFileAsync(string fileNumber)
     {
       var dosarDetails = await _queryService.CautareDosareAsync(fileNumber);
@@ -54,6 +60,173 @@ namespace LawProject.Service.FileService
 
       await ProcessDosarAsync(dosarDetails);
     }
+
+
+    // Procesarea unui dosar pentru ICCJ (pentru verificare imediată la adăugare)
+    public async Task ProcessSingleFileIccjAsync(string fileNumber)
+    {
+      var iccjDosarDetailsList = await _ccjService.CautareDosareAsync(fileNumber);
+
+      if (iccjDosarDetailsList == null || !iccjDosarDetailsList.Any())
+      {
+        _logger.LogWarning($"No case details found in ICCJ for file number: {fileNumber}");
+        return;
+      }
+
+ 
+      await ProcessDosarIccjAsync(iccjDosarDetailsList);
+    }
+
+
+
+
+
+
+    // Procesarea detaliilor unui dosar ICCJ
+    // Procesarea ședințelor ICCJ și adăugarea lor în calendar
+    public async Task ProcessDosarIccjAsync(dynamic iccjDosarDetailsList)
+    {
+      foreach (var dosar in iccjDosarDetailsList)
+      {
+        _logger.LogInformation($"Processing ICCJ case: {dosar.Numar}");
+
+        // Verificăm dacă dosarul există în baza de date locală
+        var dosarDb = await _fileManagementService.GetFileByNumberAsync((string)dosar.Numar);
+        if (dosarDb == null)
+        {
+          _logger.LogWarning($"File number {dosar.Numar} not found in local database.");
+          continue;
+        }
+
+        string color = "#E0E0E0";
+
+        if (dosarDb.LawyerId != null)
+        {
+          int lawyerId = dosarDb.LawyerId.Value;
+
+          var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == lawyerId);
+
+          // Dacă avocatul există și are o culoare validă, o folosim
+          if (lawyer != null && !string.IsNullOrWhiteSpace(lawyer.Color))
+          {
+            color = lawyer.Color;
+            _logger.LogInformation($"Lawyer Color for case {dosar.Numar}: {color}");
+          }
+          else
+          {
+            _logger.LogWarning($"Lawyer for case {dosar.Numar} does not have a color set.");
+          }
+        }
+
+        var termeneList = dosar.Termene as IEnumerable<dynamic>;
+        if (termeneList == null || !termeneList.Any())
+        {
+          _logger.LogWarning($"No hearings found for case: {dosar.Numar}");
+          continue;
+        }
+
+        // Filtrăm termenele viitoare
+        var upcomingTermene = termeneList
+      .Where(termen => termen.Data >= DateTime.Today)
+      .ToList();
+
+
+        if (!upcomingTermene.Any())
+        {
+          _logger.LogInformation($"No upcoming hearings for case number: {dosar.Numar}");
+          continue;
+        }
+
+        bool hasChanges = false;
+        var changes = new List<string>();
+
+        foreach (var termen in upcomingTermene)
+        {
+          if (!(termen.Ora is string Ora) || string.IsNullOrEmpty(Ora))
+          {
+            _logger.LogWarning($"Invalid hearing time for ICCJ case {dosar.Numar}");
+            continue;
+          }
+
+          // Calculăm ora de start și ora de final pentru termen
+          DateTime startTime = termen.Data is string ? DateTime.Parse(termen.Data) : (DateTime)termen.Data;
+          TimeSpan timeSpan = TimeSpan.Parse(Ora);
+          startTime = startTime.Add(timeSpan);
+          DateTime endTime = startTime.AddHours(1); // durata default de 1 oră
+
+          // Verificăm dacă există deja un eveniment programat
+          var existingEvent = await _fileManagementService.GetScheduledEventAsync((string)dosar.Numar, startTime);
+          string description = $" Ora: {Ora}, Sursa: {dosar.Source}";
+
+          if (existingEvent != null)
+          {
+            if (existingEvent.Description != description)
+            {
+              _logger.LogInformation($"ICCJ hearing changed for case {dosar.Numar} on {startTime}");
+
+              existingEvent.Description = description;
+              await _fileManagementService.UpdateScheduledEventAsync(existingEvent);
+
+              changes.Add($"Updated ICCJ hearing for case {dosar.Numar} on {startTime}");
+              hasChanges = true;
+            }
+          }
+          else
+          {
+            var scheduledEvent = new ScheduledEvent
+            {
+              FileNumber = dosar.Numar,
+              StartTime = startTime,
+              TipDosar = dosarDb.TipDosar.ToLower(),
+              ClientName = dosarDb.ClientName,
+              Description = description,
+              Color = color
+            };
+
+            await _fileManagementService.AddScheduledEventAsync(scheduledEvent);
+            _logger.LogInformation($"New ICCJ hearing added for case {dosar.Numar} on {startTime}");
+
+            changes.Add($"New ICCJ hearing added for case {dosar.Numar} on {startTime}");
+            hasChanges = true;
+          }
+        }
+
+        if (hasChanges)
+        {
+          string subject = $"Modificări detectate pentru dosarul ICCJ {dosar.Numar}";
+          string message = string.Join("<br>", changes);
+
+          var email = "diana.c.farcas@gmail.com";
+          var name = "Cases App";
+          await _emailService.SendNotificatonEmail(email, name, dosar.Numar.ToString());
+
+          var notification = new Notification
+          {
+            Title = $"Modificări pentru dosarul ICCJ {dosar.Numar}",
+            Message = $"S-au detectat modificări pentru dosarul ICCJ {dosar.Numar}",
+            Timestamp = DateTime.UtcNow,
+            Type = "hearing_changes",
+            FileNumber = dosar.Numar,
+            IsRead = false,
+            Details = string.Join("\n", changes),
+            UserId = 1
+          };
+
+          await _notificationService.CreateNotificationAsync(notification);
+          _logger.LogInformation($"In-app notification created for ICCJ case {dosar.Numar}");
+        }
+      }
+    }
+
+
+
+
+
+
+
+
+
+
 
     // Procesarea tuturor dosarelor din baza de date (pentru jobul periodic)
     public async Task ProcessAllFilesAsync()

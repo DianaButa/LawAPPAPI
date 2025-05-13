@@ -16,6 +16,8 @@ namespace LawProject.Models
 
     public int ClientId { get; set; }
 
+    public string? Source {  get; set; }
+
     public int? ClientPFId { get; set; }
     public virtual ClientPF ClientPF { get; set; }
 

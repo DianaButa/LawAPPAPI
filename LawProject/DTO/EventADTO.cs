@@ -31,6 +31,7 @@ namespace LawProject.DTO
 
 
     public string? Color { get; set; }
+    public bool IsReported { get; set; }
 
   }
 }

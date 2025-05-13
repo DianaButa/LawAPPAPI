@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "8IKJTdCci34a1hr78TPLCw0UNP59xtw0DGDYIdfcSi2G9OLP6r3NGQ3X/H95lm7/kSPcdBMQnjHh7nsbm7YwxQ==",
+  "dgSpecHash": "zuRDmOmr+8lrDvg2hKtEI3tC9VXfMarToxY2lwQ4/oCv+Vl+PHvDTQ/r+yI0IYVmX0wQpZZvzIR9t0VEIxSYbQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\DIANA BUTA\\source\\LawProject\\LawProject\\LawProject.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",
+    "C:\\Users\\DIANA BUTA\\.nuget\\packages\\documentformat.openxml\\3.3.0\\documentformat.openxml.3.3.0.nupkg.sha512",
+    "C:\\Users\\DIANA BUTA\\.nuget\\packages\\documentformat.openxml.framework\\3.3.0\\documentformat.openxml.framework.3.3.0.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\hangfire.aspnetcore\\1.8.18\\hangfire.aspnetcore.1.8.18.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\hangfire.core\\1.8.18\\hangfire.core.1.8.18.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\hangfire.netcore\\1.8.18\\hangfire.netcore.1.8.18.nupkg.sha512",
@@ -134,6 +136,7 @@
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.io\\4.3.0\\system.io.4.3.0.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.io.filesystem\\4.3.0\\system.io.filesystem.4.3.0.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.io.filesystem.primitives\\4.3.0\\system.io.filesystem.primitives.4.3.0.nupkg.sha512",
+    "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.io.packaging\\8.0.1\\system.io.packaging.8.0.1.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.io.pipelines\\10.0.0-preview.2.25163.2\\system.io.pipelines.10.0.0-preview.2.25163.2.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.linq\\4.3.0\\system.linq.4.3.0.nupkg.sha512",
     "C:\\Users\\DIANA BUTA\\.nuget\\packages\\system.linq.expressions\\4.1.0\\system.linq.expressions.4.1.0.nupkg.sha512",

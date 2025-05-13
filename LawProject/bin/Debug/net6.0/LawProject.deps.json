@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "LawProject/1.0.0": {
         "dependencies": {
+          "DocumentFormat.OpenXml": "3.3.0",
           "Hangfire.AspNetCore": "1.8.18",
           "Hangfire.SqlServer": "1.8.18",
           "MailKit": "4.11.0",
@@ -39,6 +40,28 @@
           "lib/net6.0/BouncyCastle.Cryptography.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.5.1.28965"
+          }
+        }
+      },
+      "DocumentFormat.OpenXml/3.3.0": {
+        "dependencies": {
+          "DocumentFormat.OpenXml.Framework": "3.3.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/DocumentFormat.OpenXml.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.3.0.0"
+          }
+        }
+      },
+      "DocumentFormat.OpenXml.Framework/3.3.0": {
+        "dependencies": {
+          "System.IO.Packaging": "8.0.1"
+        },
+        "runtime": {
+          "lib/net6.0/DocumentFormat.OpenXml.Framework.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.3.0.0"
           }
         }
       },
@@ -1317,6 +1340,14 @@
           "System.Runtime": "4.3.1"
         }
       },
+      "System.IO.Packaging/8.0.1": {
+        "runtime": {
+          "lib/net6.0/System.IO.Packaging.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.1024.46610"
+          }
+        }
+      },
       "System.IO.Pipelines/10.0.0-preview.2.25163.2": {
         "dependencies": {
           "System.Buffers": "4.6.0",
@@ -2000,6 +2031,20 @@
       "sha512": "sha512-zy8TMeTP+1FH2NrLaNZtdRbBdq7u5MI+NFZQOBSM69u5RFkciinwzV2eveY6Kjf5MzgsYvvl6kTStsj3JrXqkg==",
       "path": "bouncycastle.cryptography/2.5.1",
       "hashPath": "bouncycastle.cryptography.2.5.1.nupkg.sha512"
+    },
+    "DocumentFormat.OpenXml/3.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JogRPJNiE6kKvbuCqVRX691pPWeGMqdQgjrUwRYkdpfkMmtElfqAgcRR73geYj7OtBeEpstldZXXzJw27LUI9w==",
+      "path": "documentformat.openxml/3.3.0",
+      "hashPath": "documentformat.openxml.3.3.0.nupkg.sha512"
+    },
+    "DocumentFormat.OpenXml.Framework/3.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-R5CLzEoeyr7XDB7g3NTxRobcU19agaxVAhGZm+fZUShJGiU4bw8oUgnA2BNFepigJckfFMayOBMAbV3kDXNInA==",
+      "path": "documentformat.openxml.framework/3.3.0",
+      "hashPath": "documentformat.openxml.framework.3.3.0.nupkg.sha512"
     },
     "Hangfire.AspNetCore/1.8.18": {
       "type": "package",
@@ -2903,6 +2948,13 @@
       "sha512": "sha512-6QOb2XFLch7bEc4lIcJH49nJN2HV+OC3fHDgsLVsBVBk3Y4hFAnOBGzJ2lUu7CyDDFo9IBWkSsnbkT6IBwwiMw==",
       "path": "system.io.filesystem.primitives/4.3.0",
       "hashPath": "system.io.filesystem.primitives.4.3.0.nupkg.sha512"
+    },
+    "System.IO.Packaging/8.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-KYkIOAvPexQOLDxPO2g0BVoWInnQhPpkFzRqvNrNrMhVT6kqhVr0zEb6KCHlptLFukxnZrjuMVAnxK7pOGUYrw==",
+      "path": "system.io.packaging/8.0.1",
+      "hashPath": "system.io.packaging.8.0.1.nupkg.sha512"
     },
     "System.IO.Pipelines/10.0.0-preview.2.25163.2": {
       "type": "package",

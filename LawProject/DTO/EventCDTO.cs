@@ -24,6 +24,7 @@ namespace LawProject.DTO
     public string ClientType { get; set; }
 
     public int? FileId { get; set; }
+    public bool IsReported { get; set; }
 
 
     public string? FileNumber { get; set; }

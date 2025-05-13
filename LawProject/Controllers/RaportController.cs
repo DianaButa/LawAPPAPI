@@ -42,5 +42,13 @@ namespace LawProject.Controllers
 
       return Ok(raport);
     }
+
+    [HttpGet("getRapoarteGenerale")]
+    public async Task<IActionResult> GetRapoarteGenerale()
+    {
+      var result = await _raportService.GetRapoarteGeneraleAsync();
+      return Ok(result);
+    }
+
   }
 }

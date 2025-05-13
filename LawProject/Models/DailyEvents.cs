@@ -7,6 +7,12 @@ namespace LawProject.Models
 
     public string? FileNumber { get; set; }
 
+    public int? ScheduledEventId { get; set; }
+
+    public int? EventCId { get; set; }
+
+    public int? EventAId { get; set; }
+
     public DateTime Date { get; set; }
 
     public string? Institutie { get; set; }

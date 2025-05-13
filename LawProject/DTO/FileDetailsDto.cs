@@ -15,6 +15,17 @@ namespace LawProject.DTO
     public List<ParteDTO> Parti { get; set; }
     public List<SedintaDTO> Sedinte { get; set; }
     public List<CaleAtacDTO> CaiAtac { get; set; }
+
+    public List<TermeneDTO> Termene {  get; set; }
+  }
+
+  public class TermeneDTO
+  {
+    public DateTime Data { get; set; }
+    public string Ora { get; set; }
+    public string Solutie { get; set; }
+    public string SolutieSumar { get; set; }
+
   }
 
   public class ParteDTO

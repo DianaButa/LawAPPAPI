@@ -8,6 +8,12 @@ namespace LawProject.DTO
 
     public DateTime Date { get; set; }
 
+    public int? ScheduledEventId { get; set; }
+
+    public int? EventCId { get; set; }
+
+    public int? EventAId { get; set; }
+
     public string? Institutie { get; set; }
     public string? Descriere { get; set; }
 
@@ -19,6 +25,6 @@ namespace LawProject.DTO
     public string AllocatedHours { get; set; }
 
     public bool IsCompleted { get; set; }
-
+    public string EventType { get;  set; }
   }
 }

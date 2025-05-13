@@ -7,10 +7,12 @@ using LawProject.Configurations;
 using LawProject.Database;
 using LawProject.Service;
 using LawProject.Service.ClientService;
+using LawProject.Service.ContractService;
 using LawProject.Service.DailyEventService;
 using LawProject.Service.EmailService;
 using LawProject.Service.EventService;
 using LawProject.Service.FileService;
+using LawProject.Service.ICCJ;
 using LawProject.Service.InvoiceSerices;
 using LawProject.Service.Lawyer;
 using LawProject.Service.Notifications;
@@ -44,6 +46,13 @@ builder.Services.AddHangfire(config =>
 // Adăugarea serverului Hangfire
 builder.Services.AddHangfireServer();
 
+builder.Services.AddHttpClient<IccjService>(client =>
+{
+  // Configurăm URL-ul de bază pentru HttpClient
+  client.BaseAddress = new Uri("https://www.scj.ro/api/");
+});
+
+
 // Add services to the container.
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -52,8 +61,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IIccjService, IccjService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRaportService, RaportService>();
+builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<IDailyEventService,DailyEventService>();
 builder.Services.AddScoped<FileManagementService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
@@ -74,7 +85,7 @@ builder.Services.AddScoped<QuerySoapClient>(provider =>
 });
 
 builder.Services.AddSignalR();
-
+builder.Services.AddLogging();
 builder.Services.ConfigureCors();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

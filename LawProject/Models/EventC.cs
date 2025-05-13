@@ -18,6 +18,9 @@ namespace LawProject.Models
     public string Color { get; set; }
 
 
+    public bool IsReported { get; set; }
+
+
 
   }
 }

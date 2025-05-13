@@ -1,6 +1,7 @@
 using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
+using LawProject.Service.DailyEventService;
 using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Service.RaportService
@@ -8,10 +9,11 @@ namespace LawProject.Service.RaportService
   public class RaportService : IRaportService
   {
     private readonly ApplicationDbContext _context;
-
-    public RaportService(ApplicationDbContext context)
+    private readonly IDailyEventService _dailyEventService;
+    public RaportService(ApplicationDbContext context, IDailyEventService dailyEventService)
     {
       _context = context;
+      _dailyEventService = dailyEventService;
     }
 
     public async Task<int> CreateRaportAsync(RaportCreateDto dto)
@@ -93,6 +95,44 @@ namespace LawProject.Service.RaportService
           .ThenInclude(rt => rt.WorkTask)
           .FirstOrDefaultAsync(r => r.Id == id);
     }
+
+    public async Task<List<RaportGeneralDto>> GetRapoarteGeneraleAsync()
+    {
+      var dailyEvents = await _dailyEventService.GetAllDailyEventsAsync();
+      var rapoarte = await GetAllRapoarteAsync();
+
+      var dailyEventDtos = dailyEvents.Select(e => new RaportGeneralDto
+      {
+        TipRaport = "DailyEvent",
+        DailyEventId = e.Id,
+        FileNumber = e.FileNumber,
+        Date = e.Date,
+        Institutie = e.Institutie,
+        Descriere = e.Descriere,
+        ClientName = e.ClientName,
+        LawyerId = e.LawyerId,
+        LawyerName = e.LawyerName,
+        AllocatedHours = e.AllocatedHours,
+        IsCompleted = e.IsCompleted,
+        EventType = e.EventType
+      });
+
+      var raportDtos = rapoarte.Select(r => new RaportGeneralDto
+      {
+        TipRaport = "Raport",
+        RaportId = r.Id,
+        ClientType = r.ClientType,
+        ClientId = r.ClientId,
+        LawyerId = r.LawyerId,
+        LawyerName = r.LawyerName,
+        OreDeplasare = r.OreDeplasare,
+        OreStudiu = r.OreStudiu,
+        TaskuriLucrate = r.TaskuriLucrate.Select(t => t.WorkTask.FileNumber).ToList(),
+      });
+
+      return dailyEventDtos.Concat(raportDtos).ToList();
+    }
+
   }
 }
 

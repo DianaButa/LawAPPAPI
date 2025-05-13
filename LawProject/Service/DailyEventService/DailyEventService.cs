@@ -16,7 +16,6 @@ namespace LawProject.Service.DailyEventService
 
     public async Task AddDailyEventAsync(DailyEventsDto Dto)
     {
-      
       var newDailyEvent = new DailyEvents
       {
         FileNumber = Dto.FileNumber,
@@ -28,9 +27,66 @@ namespace LawProject.Service.DailyEventService
         AllocatedHours = Dto.AllocatedHours
       };
 
+      
+      if (Dto.EventType == "S") 
+      {
+        var scheduledEvent = await _context.ScheduledEvents
+            .FirstOrDefaultAsync(e => e.Id == Dto.Id);  
+
+        if (scheduledEvent != null)
+        {
+          scheduledEvent.IsReported = true; 
+          _context.ScheduledEvents.Update(scheduledEvent);  
+          newDailyEvent.ScheduledEventId = scheduledEvent.Id; 
+        }
+        else
+        {
+          throw new Exception($"Scheduled event with ID {Dto.Id} not found.");
+        }
+      }
+      else if (Dto.EventType == "A")
+      {
+        var eventA = await _context.EventsA
+            .FirstOrDefaultAsync(e => e.Id == Dto.Id);  
+
+        if (eventA != null)
+        {
+          eventA.IsReported = true;  
+          _context.EventsA.Update(eventA);  
+          newDailyEvent.EventAId = eventA.Id; 
+        }
+        else
+        {
+          throw new Exception($"Event A with ID {Dto.Id} not found.");
+        }
+      }
+      else if (Dto.EventType == "C")
+      {
+        var eventC = await _context.EventsC
+            .FirstOrDefaultAsync(e => e.Id == Dto.Id);  
+
+        if (eventC != null)
+        {
+          eventC.IsReported = true; 
+          _context.EventsC.Update(eventC);  
+          newDailyEvent.EventCId = eventC.Id; 
+        }
+        else
+        {
+          throw new Exception($"Event C with ID {Dto.Id} not found.");
+        }
+      }
+      else
+      {
+    
+        throw new ArgumentException("Invalid event type.");
+      }
+
+   
       _context.DailyEvents.Add(newDailyEvent);
-      await _context.SaveChangesAsync();
+      await _context.SaveChangesAsync();  
     }
+
 
     public async Task<List<DailyEventsDto>> GetAllDailyEventsAsync()
     {
