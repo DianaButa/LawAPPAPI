@@ -88,6 +88,16 @@ namespace LawProject.Service.RaportService
           .ToListAsync();
     }
 
+    public async Task<List<Raport>> GetRapoarteByClientAsync(int clientId, string clientType)
+    {
+      return await _context.Rapoarte
+          .Include(r => r.TaskuriLucrate)
+          .ThenInclude(rt => rt.WorkTask)
+          .Where(r => r.ClientId == clientId && r.ClientType == clientType)
+          .ToListAsync();
+    }
+
+
     public async Task<Raport?> GetRaportByIdAsync(int id)
     {
       return await _context.Rapoarte
@@ -110,6 +120,8 @@ namespace LawProject.Service.RaportService
         Institutie = e.Institutie,
         Descriere = e.Descriere,
         ClientName = e.ClientName,
+        ClientId = e.ClientId,
+        ClientType=e.ClientType,
         LawyerId = e.LawyerId,
         LawyerName = e.LawyerName,
         AllocatedHours = e.AllocatedHours,
@@ -132,6 +144,50 @@ namespace LawProject.Service.RaportService
 
       return dailyEventDtos.Concat(raportDtos).ToList();
     }
+
+    public async Task<List<RaportGeneralDto>> GetRapoarteGeneraleByLawyerAsync(int lawyerId)
+    {
+      var dailyEvents = await _dailyEventService.GetAllDailyEventsAsync();
+      var rapoarte = await GetAllRapoarteAsync();
+
+      var dailyEventDtos = dailyEvents
+        .Where(e => e.LawyerId == lawyerId)
+        .Select(e => new RaportGeneralDto
+        {
+          TipRaport = "DailyEvent",
+          DailyEventId = e.Id,
+          FileNumber = e.FileNumber,
+          Date = e.Date,
+          Institutie = e.Institutie,
+          Descriere = e.Descriere,
+          ClientName = e.ClientName,
+          ClientId = e.ClientId,
+          ClientType = e.ClientType,
+          LawyerId = e.LawyerId,
+          LawyerName = e.LawyerName,
+          AllocatedHours = e.AllocatedHours,
+          IsCompleted = e.IsCompleted,
+          EventType = e.EventType
+        });
+
+      var raportDtos = rapoarte
+        .Where(r => r.LawyerId == lawyerId)
+        .Select(r => new RaportGeneralDto
+        {
+          TipRaport = "Raport",
+          RaportId = r.Id,
+          ClientType = r.ClientType,
+          ClientId = r.ClientId,
+          LawyerId = r.LawyerId,
+          LawyerName = r.LawyerName,
+          OreDeplasare = r.OreDeplasare,
+          OreStudiu = r.OreStudiu,
+          TaskuriLucrate = r.TaskuriLucrate.Select(t => t.WorkTask.FileNumber).ToList(),
+        });
+
+      return dailyEventDtos.Concat(raportDtos).ToList();
+    }
+
 
   }
 }

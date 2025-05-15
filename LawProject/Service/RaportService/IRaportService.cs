@@ -9,6 +9,9 @@ namespace LawProject.Service.RaportService
     Task<List<Raport>> GetAllRapoarteAsync();
     Task<Raport?> GetRaportByIdAsync(int id);
 
-    Task<List<RaportGeneralDto>> GetRapoarteGeneraleAsync(); 
+    Task<List<RaportGeneralDto>> GetRapoarteGeneraleAsync();
+
+    Task<List<RaportGeneralDto>> GetRapoarteGeneraleByLawyerAsync(int lawyerId);
+    Task<List<Raport>> GetRapoarteByClientAsync(int clientId, string clientType);
   }
 }

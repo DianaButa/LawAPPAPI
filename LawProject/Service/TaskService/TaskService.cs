@@ -136,6 +136,25 @@ namespace LawProject.Service.TaskService
       return tasks;
     }
 
+    public async Task<IEnumerable<WorkTask>> GetTaskByClient(int clientId, string clientType)
+    {
+      return await _context.Tasks
+          .Where(t => t.ClientType == clientType && t.ClientId == clientId)
+          .ToListAsync();
+    }
+
+    public async Task<IEnumerable<WorkTask>> GetClosedTasksByClient(int clientId, string clientType)
+    {
+      return await _context.Tasks
+          .Where(t => t.ClientType == clientType
+                   && t.ClientId == clientId
+                   && t.Status == "Closed")
+          .ToListAsync();
+    }
+
+
+
+
 
     public async Task<IEnumerable<WorkTask>> GetTasksByLawyerIdAsync(int lawyerId)
     {
@@ -143,6 +162,61 @@ namespace LawProject.Service.TaskService
           .Where(t => t.LawyerId == lawyerId)
           .ToListAsync();
     }
+
+
+    // 2. Metoda pentru a obține dosarele unui avocat cu statusul specificat
+    public async Task<List<WorkTask>> GetTasksByLawyerIdAndOpenStatusAsync(int lawyerId)
+    {
+      var tasks = await _context.Tasks
+          .Where(f => f.LawyerId == lawyerId && f.Status == "open")
+          .ToListAsync();
+
+      foreach (var workTask in tasks)
+      {
+        var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == workTask.LawyerId);
+        workTask.LawyerName = lawyer?.LawyerName ?? string.Empty;
+        if (workTask.ClientType.ToUpper() == "PF")
+        {
+          var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
+        }
+        else if (workTask.ClientType.ToUpper() == "PJ")
+        {
+          var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPJ?.CompanyName;
+        }
+      }
+
+      return tasks;
+    }
+    public async Task<List<WorkTask>> GetTasksByLawyerIdAndClosedStatusAsync(int lawyerId)
+    {
+      var tasks = await _context.Tasks
+          .Where(f => f.LawyerId == lawyerId && f.Status == "closed")
+          .ToListAsync();
+
+      foreach (var workTask in tasks)
+      {
+        var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == workTask.LawyerId);
+        workTask.LawyerName = lawyer?.LawyerName ?? string.Empty;
+
+        if (workTask.ClientType.ToUpper() == "PF")
+        {
+          var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
+        }
+        else if (workTask.ClientType.ToUpper() == "PJ")
+        {
+          var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
+          workTask.ClientName = clientPJ?.CompanyName;
+        }
+      }
+
+      return tasks;
+    }
+
+
+
 
 
 

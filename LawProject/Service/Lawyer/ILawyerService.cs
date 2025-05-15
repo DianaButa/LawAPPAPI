@@ -6,5 +6,9 @@ namespace LawProject.Service.Lawyer
   {
     Task<IEnumerable<LawyerDto>> GetAllLawyersAsync();
     Task<LawyerDto> AddLawyerAsync(LawyerDto lawyerDto);
+
+    Task<LawyerOverviewDto> GetOverviewByLawyerIdAsync(int lawyerId);
+
+    Task<List<LawyerOverviewDto>> GetAllLawyerOverviewsAsync();
   }
 }

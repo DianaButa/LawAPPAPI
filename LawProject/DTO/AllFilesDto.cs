@@ -18,6 +18,9 @@ namespace LawProject.DTO
     public string Onorariu { get; set; } = string.Empty;
 
     public string Source { get; set; } = string.Empty;
+    public string CuvantCheie { get; set; } = string.Empty;
+
+    public string OutCome { get; set; } = string.Empty;
 
     public string OnorariuRestant {  get; set; } =string.Empty;
 

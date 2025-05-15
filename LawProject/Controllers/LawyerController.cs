@@ -41,5 +41,39 @@ namespace LawProject.Controllers
         return BadRequest(ex.Message); // Returnăm mesajul de eroare
       }
     }
+
+    [HttpGet("{lawyerId}/overview")]
+    public async Task<IActionResult> GetLawyerOverview(int lawyerId)
+    {
+      try
+      {
+        var overview = await _lawyerService.GetOverviewByLawyerIdAsync(lawyerId);
+        return Ok(overview);
+      }
+      catch (KeyNotFoundException ex)
+      {
+        return NotFound(new { Message = ex.Message });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Eroare internă: {ex.Message}");
+      }
+    }
+
+    [HttpGet("overview-all")]
+    public async Task<IActionResult> GetAllLawyerOverviews()
+    {
+      try
+      {
+        var allLawyerOverviews = await _lawyerService.GetAllLawyerOverviewsAsync();
+        return Ok(allLawyerOverviews);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Eroare internă: {ex.Message}");
+      }
+    }
+
+
   }
 }

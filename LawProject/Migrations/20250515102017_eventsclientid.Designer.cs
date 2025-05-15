@@ -4,6 +4,7 @@ using LawProject.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LawProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515102017_eventsclientid")]
+    partial class eventsclientid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,14 +188,8 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ClientName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
@@ -216,9 +212,6 @@ namespace LawProject.Migrations
 
                     b.Property<int>("LawyerId")
                         .HasColumnType("int");
-
-                    b.Property<string>("LawyerName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ScheduledEventId")
                         .HasColumnType("int");

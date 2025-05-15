@@ -12,12 +12,14 @@ namespace LawProject.Controllers
   {
     private readonly ApplicationDbContext _context;
     private readonly IDailyEventService _dailyEventService;
+    private readonly ILogger<TaskController> _logger;
 
 
-    public DailyEventsController(ApplicationDbContext context, IDailyEventService dailyEventService)
+    public DailyEventsController(ApplicationDbContext context, IDailyEventService dailyEventService, ILogger<TaskController> logger)
     {
-      _context=context;
-      _dailyEventService=dailyEventService;
+      _context = context;
+      _dailyEventService = dailyEventService;
+      _logger = logger;
     }
 
 
@@ -38,6 +40,22 @@ namespace LawProject.Controllers
     {
       var events = await _dailyEventService.GetAllDailyEventsAsync();
       return Ok(events);
+    }
+
+
+    [HttpGet("DailybyClientId")]
+    public async Task<ActionResult<IEnumerable<EventADTO>>> GetDailyEventCbyClientId(string clientName)
+    {
+      try
+      {
+        var events = await _dailyEventService.GetEventsByClient(clientName);
+        return Ok(events);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru clientul cu ID {clientName}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
     }
 
     // GET: api/DailyEvents/{lawyerId}

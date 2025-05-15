@@ -19,6 +19,10 @@ namespace LawProject.DTO
 
     public string ClientName { get; set; }
 
+    public int? ClientId { get; set; }
+
+    public string? ClientType { get; set; }
+
     public int LawyerId { get; set; }
     public string? LawyerName { get; set; }
 

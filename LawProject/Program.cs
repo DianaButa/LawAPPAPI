@@ -66,7 +66,7 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRaportService, RaportService>();
 builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<IDailyEventService,DailyEventService>();
-builder.Services.AddScoped<FileManagementService>();
+builder.Services.AddScoped<IFileManagementService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<FileToCalendarService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

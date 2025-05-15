@@ -12,7 +12,7 @@ namespace LawProject.Service.FileService
   {
  
     private readonly ILogger<FileToCalendarService> _logger;
-    private readonly FileManagementService _fileManagementService;
+    private readonly IFileManagementService _fileManagementService;
     private readonly MyQueryService _queryService;
   
 
@@ -25,7 +25,7 @@ namespace LawProject.Service.FileService
     public FileToCalendarService(
     
         ILogger<FileToCalendarService> logger,
-        FileManagementService fileManagementService,
+        IFileManagementService fileManagementService,
         MyQueryService queryService,
         IEmailService emailService,
         ApplicationDbContext context,
@@ -165,6 +165,7 @@ namespace LawProject.Service.FileService
               _logger.LogInformation($"ICCJ hearing changed for case {dosar.Numar} on {startTime}");
 
               existingEvent.Description = description;
+             
               await _fileManagementService.UpdateScheduledEventAsync(existingEvent);
 
               changes.Add($"Updated ICCJ hearing for case {dosar.Numar} on {startTime}");
@@ -177,6 +178,9 @@ namespace LawProject.Service.FileService
             {
               FileNumber = dosar.Numar,
               StartTime = startTime,
+              ClientId = dosarDb.ClientId,
+              ClientType = dosarDb.ClientType,
+              Source = dosarDb.Source,
               TipDosar = dosarDb.TipDosar.ToLower(),
               ClientName = dosarDb.ClientName,
               Description = description,
@@ -349,7 +353,10 @@ namespace LawProject.Service.FileService
               FileNumber = dosar.numar,
               StartTime = startTime,
               TipDosar = dosarDb.TipDosar.ToLower(),
+              Source=dosarDb.Source,
               ClientName = dosarDb.ClientName,
+              ClientId= dosarDb.ClientId,
+              ClientType= dosarDb.ClientType,
               Description = $"Complet: Ora: {ora}, {sedinta.complet},  Instituție: {dosar.institutie}",
               Color = color
             };

@@ -3,20 +3,21 @@ using LawProject.DTO;
 using LawProject.Models;
 using LawProject.Service.Notifications;
 using Microsoft.EntityFrameworkCore;
+using System.ServiceModel;
 
 namespace LawProject.Service.FileService
 {
-  public class FileManagementService
+  public class IFileManagementService
   {
     private readonly ApplicationDbContext _context;
     private readonly MyQueryService _queryService;
-    private readonly ILogger<FileManagementService> _logger;
+    private readonly ILogger<IFileManagementService> _logger;
     private readonly INotificationService _notificationService;
 
-    public FileManagementService(
+    public IFileManagementService(
         ApplicationDbContext context,
         MyQueryService queryService,
-        ILogger<FileManagementService> logger,
+        ILogger<IFileManagementService> logger,
         INotificationService notificationService)
     {
       _context = context;
@@ -53,15 +54,28 @@ namespace LawProject.Service.FileService
       return await _context.ScheduledEvents.ToListAsync();
     }
 
-    // Metodă pentru a obține un eveniment specific bazat pe numărul dosarului și ora de început
     public async Task<ScheduledEvent> GetScheduledEventAsync(string fileNumber, DateTime startTime)
     {
       return await _context.ScheduledEvents
           .FirstOrDefaultAsync(e => e.FileNumber == fileNumber && e.StartTime == startTime);
     }
 
-    // Metodă pentru a adăuga un eveniment nou în baza de date
-    public async Task AddScheduledEventAsync(ScheduledEvent scheduledEvent)
+    public async Task<IEnumerable<ScheduledEvent>> GetScheduledEventbyClientIdAsync(int clientId, string clientName)
+    {
+      var events = await _context.ScheduledEvents
+  .Where(e => e.ClientId == clientId && e.ClientName.ToLower().Contains(clientName.ToLower()))
+
+     .ToListAsync();
+
+      _logger.LogInformation($"Found {events.Count} scheduled events");
+
+      return events;
+    }
+
+
+
+      // Metodă pentru a adăuga un eveniment nou în baza de date
+      public async Task AddScheduledEventAsync(ScheduledEvent scheduledEvent)
     {
       _context.ScheduledEvents.Add(scheduledEvent);
       await _context.SaveChangesAsync();
@@ -104,6 +118,8 @@ namespace LawProject.Service.FileService
         Instanta=f.Instanta,
         Status=f.Status,
         Onorariu=f.Onorariu,
+        Outcome=f.Outcome,
+        Source=f.Source,
         Moneda=f.Moneda,
         OnorariuRestant=f.OnorariuRestant,
         Delegatie=f.Delegatie,
@@ -144,9 +160,11 @@ namespace LawProject.Service.FileService
             Moneda=dbFile.Moneda,
             OnorariuRestant= dbFile.OnorariuRestant,
             Delegatie=dbFile.Delegatie,
+            CuvantCheie=dbFile.CuvantCheie,
             NumarContract=dbFile.NumarContract,
             DataScadenta=dbFile.DataScadenta,
-           
+            OutCome=dbFile.Outcome,
+           Source=dbFile.Source,
             TipDosar = dbFile.TipDosar,
             Instanta=dbFile.Instanta,
             LawyerName = dbFile.LawyerName,
@@ -168,14 +186,15 @@ namespace LawProject.Service.FileService
             FileNumber = dbFile.FileNumber,
             ClientName = dbFile.ClientName,
             Details = dbFile.Details,
-            Email = dbFile.Email,
             TipDosar = dbFile.TipDosar,
             Status= dbFile.Status,
+            Source=dbFile.Source,
             LawyerName = dbFile.LawyerName,
             Instanta= dbFile.Instanta,
             LawyerId = dbFile.LawyerId,
             Onorariu = dbFile.Onorariu,
             Moneda= dbFile.Moneda,
+            CuvantCheie=dbFile.CuvantCheie,
             OnorariuRestant=dbFile.OnorariuRestant,
             Delegatie = dbFile.Delegatie,
             NumarContract = dbFile.NumarContract,
@@ -278,6 +297,8 @@ namespace LawProject.Service.FileService
           ClientId = dto.ClientId,
           Details = dto.Details,
           Onorariu=dto.Onorariu,
+          Source=dto.Source,
+          CuvantCheie=dto.CuvantCheie,
           Moneda = dto.Moneda.ToUpper(), 
           OnorariuRestant = $"{dto.Onorariu} {dto.Moneda.ToUpper()}",
           DataScadenta =dto.DataScadenta,
@@ -293,12 +314,8 @@ namespace LawProject.Service.FileService
 
         // Adăugăm fișierul în context
         _context.Files.Add(file);
-
-        // Salvăm modificările în baza de date
         await _context.SaveChangesAsync();
         _logger.LogInformation($"File with file number {dto.FileNumber} added successfully.");
-
-        // Creăm notificarea
         var notification = new Notification
         {
           Title = "Fișier nou adăugat",
@@ -308,10 +325,8 @@ namespace LawProject.Service.FileService
           FileNumber = dto.FileNumber,
           IsRead = false,
           Details = $"Client: {file.ClientName}, Tip dosar: {dto.TipDosar}",
-          UserId = 1 // Trebuie să obții UserId din contextul actual
+          UserId = 1 
         };
-
-        // Creăm notificarea în sistem
         await _notificationService.CreateNotificationAsync(notification);
 
         _logger.LogInformation($"Notification for file {dto.FileNumber} created successfully.");
@@ -319,7 +334,7 @@ namespace LawProject.Service.FileService
       catch (ArgumentException ex)
       {
         _logger.LogError($"Validation error: {ex.Message}");
-        throw; // Re-throw the exception or handle accordingly
+        throw; 
       }
       catch (Exception ex)
       {
@@ -328,7 +343,7 @@ namespace LawProject.Service.FileService
         {
           _logger.LogError($"Inner exception: {ex.InnerException.Message}");
         }
-        throw; // Ensure that the error is propagated correctly
+        throw;
       }
     }
 
@@ -356,12 +371,39 @@ namespace LawProject.Service.FileService
       }
 
       fileToClose.Outcome = outcome;
-
-      // Salvăm modificările în baza de date
       _context.Files.Update(fileToClose);
       await _context.SaveChangesAsync();
 
       _logger.LogInformation($"File with ID {id} closed and outcome set to {outcome}.");
+    }
+
+    public async Task<List<CreateFileDto>> GetAllClosedFilesAsync()
+    {
+      return await _context.Files
+          .Include(f => f.Lawyer)
+          .Where(f => f.Status == "Inchis" || f.Status == "închis")
+          .Select(f => new CreateFileDto
+          {
+            Id = f.Id,
+            FileNumber = f.FileNumber,
+            ClientId = f.ClientId,
+            ClientName = f.ClientName,
+            TipDosar = f.TipDosar,
+            Source = f.Source,
+            Instanta = f.Instanta,
+            Details = f.Details,
+            NumarContract = f.NumarContract,
+            Delegatie = f.Delegatie,
+            CuvantCheie=f.CuvantCheie,
+            Onorariu = f.Onorariu,
+            Moneda = f.Moneda,
+            DataScadenta = f.DataScadenta,
+            LawyerId = f.Lawyer.Id,
+            LawyerName = f.Lawyer.LawyerName,
+            Status = f.Status,
+            Outcome = f.Outcome
+          })
+          .ToListAsync();
     }
 
 
@@ -380,10 +422,13 @@ namespace LawProject.Service.FileService
             ClientName = d.ClientName,
             TipDosar = d.TipDosar,
             Instanta=d.Instanta,
+            Source=d.Source,
+            Outcome=d.Outcome,
             Details = d.Details,
             NumarContract=d.NumarContract,
             Delegatie=d.Delegatie,
             Onorariu=d.Onorariu,
+            CuvantCheie=d.CuvantCheie,
             Moneda=d.Moneda,
             OnorariuRestant=d.Onorariu,
             DataScadenta=d.DataScadenta,
@@ -398,26 +443,23 @@ namespace LawProject.Service.FileService
     {
       _logger.LogInformation($"Fetching case details for file number: {fileNumber}");
 
-      // Apelează serviciul SOAP pentru numărul de dosar dat
       var dosare = await _queryService.CautareDosareAsync(fileNumber);
-
-      // Verifică dacă există dosare returnate
       if (dosare == null || !dosare.Any())
       {
         _logger.LogWarning($"No case details found for file number: {fileNumber}");
-        return null; // Returnează null dacă nu sunt detalii despre dosar
+        return null; 
       }
 
-      // Maparea dosarului la DTO-ul FileDetailsDTO
-      var fileDetails = dosare.Select(d => new FileDetailsDto
+          var fileDetails = dosare.Select(d => new FileDetailsDto
       {
         Numar = d.numar,
         Data = d.data,
-        Institutie = d.institutie.ToString(), // Verifică dacă `institutie` este null
+        Institutie = d.institutie.ToString(), 
         Departament = d.departament,
         ObiectDosar= d.obiect.ToString(),
-        CategorieCaz = d.categorieCaz?.ToString(), // Verifică dacă `categorieCaz` este null
-        StadiuProcesual = d.stadiuProcesual?.ToString(), // Verifică dacă `stadiuProcesual` este null
+        
+        CategorieCaz = d.categorieCaz?.ToString(), 
+        StadiuProcesual = d.stadiuProcesual?.ToString(), 
         Parti = d.parti?.Select(p => new ParteDTO
         {
           Nume = p.nume,
@@ -577,6 +619,8 @@ namespace LawProject.Service.FileService
             Id = d.Id,
             FileNumber = d.FileNumber,
             ClientName = d.ClientName,
+            Source=d.Source,
+            CuvantCheie=d.CuvantCheie,
             TipDosar = d.TipDosar,
             Instanta=d.Instanta,
             Details = d.Details,
@@ -620,11 +664,14 @@ namespace LawProject.Service.FileService
           ClientId = f.ClientId,
           ClientName = f.ClientName,
           TipDosar = f.TipDosar,
+          Source=f.Source,
           Instanta = f.Instanta,
           Details = f.Details,
           NumarContract = f.NumarContract,
           Delegatie = f.Delegatie,
           Onorariu = f.Onorariu,
+          CuvantCheie=f.CuvantCheie,
+          Outcome=f.Outcome,
           Moneda=f.Moneda,
           DataScadenta = f.DataScadenta,
           LawyerId = f.Lawyer.Id,
@@ -632,6 +679,93 @@ namespace LawProject.Service.FileService
         })
         .FirstOrDefaultAsync();
     }
+
+    public async Task<List<CreateFileDto>> GetFilesByLawyerIdAsync(int lawyerId)
+    {
+      return await _context.Files
+          .Include(f => f.Lawyer)
+          .Where(f => f.LawyerId == lawyerId)
+          .Select(f => new CreateFileDto
+          {
+            Id = f.Id,
+            FileNumber = f.FileNumber,
+            ClientId = f.ClientId,
+            ClientName = f.ClientName,
+            TipDosar = f.TipDosar,
+            Source = f.Source,
+            Instanta = f.Instanta,
+            Details = f.Details,
+            NumarContract = f.NumarContract,
+            Delegatie = f.Delegatie,
+            Onorariu = f.Onorariu,
+            CuvantCheie=f.CuvantCheie,
+            Moneda = f.Moneda,
+            DataScadenta = f.DataScadenta,
+            LawyerId = f.Lawyer.Id,
+            LawyerName = f.Lawyer.LawyerName,
+            Status = f.Status
+          })
+          .ToListAsync();
+    }
+
+    public async Task<List<CreateFileDto>> GetClosedFilesByLawyerIdAsync(int lawyerId)
+    {
+      return await _context.Files
+          .Include(f => f.Lawyer)
+        .Where(f => f.LawyerId == lawyerId && (f.Status == "Inchis" || f.Status == "închis"))
+          .Select(f => new CreateFileDto
+          {
+            Id = f.Id,
+            FileNumber = f.FileNumber,
+            ClientId = f.ClientId,
+            ClientName = f.ClientName,
+            TipDosar = f.TipDosar,
+            Source = f.Source,
+            Instanta = f.Instanta,
+            Details = f.Details,
+            NumarContract = f.NumarContract,
+            Delegatie = f.Delegatie,
+            Onorariu = f.Onorariu,
+            CuvantCheie = f.CuvantCheie,
+            Moneda = f.Moneda,
+            DataScadenta = f.DataScadenta,
+            LawyerId = f.Lawyer.Id,
+            LawyerName = f.Lawyer.LawyerName,
+            Status = f.Status,
+            Outcome = f.Outcome
+          })
+          .ToListAsync();
+    }
+
+
+    public async Task<List<CreateFileDto>> GetOpenFilesByLawyerIdAsync(int lawyerId)
+    {
+      return await _context.Files
+          .Include(f => f.Lawyer)
+          .Where(f => f.LawyerId == lawyerId && f.Status == "Deschis")
+          .Select(f => new CreateFileDto
+          {
+            Id = f.Id,
+            FileNumber = f.FileNumber,
+            ClientId = f.ClientId,
+            ClientName = f.ClientName,
+            TipDosar = f.TipDosar,
+            Source = f.Source,
+            Instanta = f.Instanta,
+            Details = f.Details,
+            CuvantCheie = f.CuvantCheie,
+            NumarContract = f.NumarContract,
+            Delegatie = f.Delegatie,
+            Onorariu = f.Onorariu,
+            Moneda = f.Moneda,
+            DataScadenta = f.DataScadenta,
+            LawyerId = f.Lawyer.Id,
+            LawyerName = f.Lawyer.LawyerName,
+            Status = f.Status
+          })
+          .ToListAsync();
+    }
+
 
 
 

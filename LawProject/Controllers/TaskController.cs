@@ -75,9 +75,37 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("closed-tasksbyClient")]
+    public async Task<IActionResult> GetClosedTasksByClient([FromQuery] int clientId, [FromQuery] string clientType)
+    {
+      try
+      {
+        var tasks = await _taskService.GetClosedTasksByClient(clientId, clientType);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la fetch closed tasks: {ex.Message}");
+        return StatusCode(500, "A apărut o eroare la procesarea cererii.");
+      }
+    }
+
+      [HttpGet("clientId")]
+    public async Task<IActionResult> GetTasksByClientId([FromQuery] int clientId, string clientType)
+    {
+      try
+      {
+        var tasks = await _taskService.GetTaskByClient(clientId, clientType);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru clientul cu ID {clientId}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
 
     [HttpGet("by-lawyer")]
-
     public async Task<IActionResult> GetTasksByLawyerId([FromQuery] int lawyerId)
     {
       try
@@ -88,6 +116,37 @@ namespace LawProject.Controllers
       catch (Exception ex)
       {
         _logger.LogError($"Eroare la obținerea task-urilor pentru avocatul cu ID {lawyerId}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpGet("by-lawyer/open")]
+    public async Task<IActionResult> GetTasksByLawyerIdOpen([FromQuery] int lawyerId)
+    {
+      try
+      {
+        var tasks = await _taskService.GetTasksByLawyerIdAndOpenStatusAsync(lawyerId);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru avocatul cu ID {lawyerId} și status 'open': {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
+
+    [HttpGet("by-lawyer/closed")]
+    public async Task<IActionResult> GetTasksByLawyerIdClosed([FromQuery] int lawyerId)
+    {
+      try
+      {
+        var tasks = await _taskService.GetTasksByLawyerIdAndClosedStatusAsync(lawyerId);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru avocatul cu ID {lawyerId} și status 'closed': {ex.Message}");
         return BadRequest(ex.Message);
       }
     }

@@ -18,14 +18,14 @@ namespace LawProject.Controllers
 
   {
 
-    private readonly FileManagementService _fileManagementService;
+    private readonly IFileManagementService _fileManagementService;
     private readonly FileToCalendarService _fileToCalendarService;
     private readonly MyQueryService _queryService;
     private readonly ILogger<FilesController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
     private readonly IIccjService _ccjService;
-    public FilesController(FileManagementService fileManagementService, FileToCalendarService fileToCalendarService, MyQueryService queryService,
+    public FilesController(IFileManagementService fileManagementService, FileToCalendarService fileToCalendarService, MyQueryService queryService,
                                 ILogger<FilesController> logger, IEmailService emailService, ApplicationDbContext _context, IIccjService iccjService)
     {
       _fileManagementService = fileManagementService;
@@ -53,56 +53,56 @@ namespace LawProject.Controllers
     }
 
     [HttpGet("{fileNumber}")]
-    public async Task<IActionResult> GetFileByNumber(string fileNumber)
+    public async Task<IActionResult> GetFileByNumberWithSource(string fileNumber, [FromQuery] string source)
     {
       try
       {
         // Decodifică numărul de dosar din URL
         fileNumber = Uri.UnescapeDataString(fileNumber);
 
-        var fileDetail = await _fileManagementService.GetFileDetailsByNumberAsync(fileNumber);
-
-        if (fileDetail == null)
+        if (string.IsNullOrEmpty(source))
         {
-          return NotFound($"File with number {fileNumber} not found.");
+          return BadRequest("Source is required.");
         }
 
-        return Ok(fileDetail);
+        if (source.Equals("JUST", StringComparison.OrdinalIgnoreCase))
+        {
+          // Execută logica pentru source = "JUST"
+          var fileDetail = await _fileManagementService.GetFileDetailsByNumberAsync(fileNumber);
+
+          if (fileDetail == null)
+          {
+            return NotFound($"File with number {fileNumber} not found.");
+          }
+
+          return Ok(fileDetail);
+        }
+        else if (source.Equals("ICCJ", StringComparison.OrdinalIgnoreCase))
+        {
+          // Execută logica pentru source = "ICCJ"
+          var dosare = await _ccjService.CautareDosareAsync(fileNumber);
+
+          if (dosare == null || !dosare.Any())
+          {
+            _logger.LogWarning($"No case details found for file number: {fileNumber}");
+            return NotFound($"No case details found for file number: {fileNumber}");
+          }
+
+          return Ok(dosare);
+        }
+        else
+        {
+          
+          return BadRequest("Invalid source value. It should be either 'JUST' or 'ICCJ'.");
+        }
       }
       catch (Exception ex)
       {
-        return StatusCode(500, $"Internal server error: {ex.Message}");
-      }
-    }
-
-    [HttpGet("iccj/{fileNumber}")]
-    public async Task<IActionResult> GetIccjtFileByNumber(string fileNumber)
-    {
-      try
-      {
-        // Decodifică numărul de dosar din URL
-        fileNumber = Uri.UnescapeDataString(fileNumber);
-
-        // Căutăm dosarele folosind IccjService
-        var dosare = await _ccjService.CautareDosareAsync(fileNumber);
-
-        // Verifică dacă există dosare returnate
-        if (dosare == null || !dosare.Any())
-        {
-          _logger.LogWarning($"No case details found for file number: {fileNumber}");
-          return NotFound($"No case details found for file number: {fileNumber}");
-        }
-
-        // Returnează toate datele despre dosar (fără mapare detaliată)
-        return Ok(dosare);
-      }
-      catch (Exception ex)
-      {
-        // Loghează eroarea
         _logger.LogError(ex, "An error occurred while retrieving the file details.");
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
+
 
 
 
@@ -145,29 +145,26 @@ namespace LawProject.Controllers
           dto.Details = "Default details";
         }
 
-        // Adaugă dosarul în baza de date
         await _fileManagementService.AddFileAsync(dto);
 
-        // După ce dosarul este adăugat, verifică sursa dosarului
         if (dto.Source == "ICCJ")
         {
-          // Dacă sursa este ICCJ, procesează dosarul pentru ICCJ
+   
           _logger.LogInformation($"Processing ICCJ file {dto.FileNumber}");
           await _fileToCalendarService.ProcessSingleFileIccjAsync(dto.FileNumber);
         }
         else if (dto.Source == "JUST")
         {
-          // Dacă sursa este JUST, procesează dosarul pentru Justiție
+          
           _logger.LogInformation($"Processing JUST file {dto.FileNumber}");
           await _fileToCalendarService.ProcessSingleFileAsync(dto.FileNumber);
         }
         else
         {
-          // Dacă sursa este none, doar salvează dosarul și trimite notificările
+         
           _logger.LogInformation($"No specific source. Saving file {dto.FileNumber} without additional processing.");
         }
 
-          // Trimite email de confirmare
           try
           {
           string email = dto.Email;
@@ -205,7 +202,23 @@ namespace LawProject.Controllers
       try
       {
         var scheduledEvents = await _fileManagementService.GetScheduledEventsAsync();
-        return Ok(scheduledEvents); // Returnează evenimentele ca JSON
+        return Ok(scheduledEvents);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Error fetching scheduled events: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+
+    [HttpGet("scheduledEvent-clientId")]
+    public async Task<IActionResult> GetScheduledEventsbyClientId(int clientId, string clientName)
+    {
+      try
+      {
+        var scheduledEvents = await _fileManagementService.GetScheduledEventbyClientIdAsync(clientId, clientName);
+        return Ok(scheduledEvents);
       }
       catch (Exception ex)
       {
@@ -242,26 +255,55 @@ namespace LawProject.Controllers
       }
     }
 
-    [HttpPut("close-file/{id}")]
+    //Inchidere dosar
+    [HttpPut("close-file")]
     public async Task<IActionResult> CloseFileAsync(int id, [FromBody] CloseFileDto closeFileDto)
     {
-      // Căutăm dosarul în baza de date
-      var file = await _context.Files.FindAsync(id);
-
-      if (file == null)
+      try
       {
-        return NotFound(new { Message = "Fișierul nu a fost găsit." });
+        if (closeFileDto.Outcome != "Castigat" && closeFileDto.Outcome != "Necastigat")
+        {
+          return BadRequest("Rezultatul trebuie să fie 'Castigat' sau 'Necastigat'.");
+        }
+        await _fileManagementService.CloseFileAsync(id, closeFileDto.Outcome);
+
+        return Ok(new { Message = "Fișierul a fost închis cu succes." });
       }
+      catch (KeyNotFoundException ex)
+      { 
+        return NotFound(new { Message = ex.Message });
+      }
+      catch (ArgumentException ex)
+      {
+        return BadRequest(new { Message = ex.Message });
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la închiderea dosarului {id}: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
 
-      // Actualizăm statusul dosarului și outcome-ul
-      file.Status = "închis";  // Setăm statusul la "închis"
-      file.Outcome = closeFileDto.Outcome;  // Setăm outcome-ul
 
-      // Salvăm modificările
-      await _context.SaveChangesAsync();
+    [HttpGet("closed-files")]
+    public async Task<IActionResult> GetAllClosedFilesAsync()
+    {
+      try
+      {
+        var closedFiles = await _fileManagementService.GetAllClosedFilesAsync();
 
+        if (closedFiles == null || !closedFiles.Any())
+        {
+          return NotFound(new { Message = "Nu există dosare închise." });
+        }
 
-      return Ok(new { Message = "Fișierul a fost închis cu succes." });
+        return Ok(closedFiles);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea dosarelor închise: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
     }
 
 
@@ -359,8 +401,72 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("by-lawyer")]
+    public async Task<IActionResult> GetFilesByLawyerId(int lawyerId)
+    {
+      try
+      {
+        var files = await _fileManagementService.GetFilesByLawyerIdAsync(lawyerId);
+
+        if (files == null || files.Count == 0)
+        {
+          return NotFound($"No files found for Lawyer with ID {lawyerId}.");
+        }
+
+        return Ok(files);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+    // Controller - Endpoint pentru dosarele deschise ale unui avocat
+    [HttpGet("by-lawyer/{lawyerId}/closed")]
+    public async Task<IActionResult> GetClosedFilesByLawyerId(int lawyerId)
+    {
+      try
+      {
+        var files = await _fileManagementService.GetClosedFilesByLawyerIdAsync(lawyerId);
+
+        if (files == null || !files.Any())
+        {
+          return NotFound($"No closed files found for Lawyer with ID {lawyerId}.");
+        }
+
+        return Ok(files);  // Returnează fișierele închise
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Error retrieving closed files for Lawyer with ID {lawyerId}: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+    // Endpoint pentru fișierele deschise ale unui avocat
+    [HttpGet("by-lawyer/{lawyerId}/open")]
+    public async Task<IActionResult> GetOpenFilesByLawyerId(int lawyerId)
+    {
+      try
+      {
+        var files = await _fileManagementService.GetOpenFilesByLawyerIdAsync(lawyerId);
+
+        if (files == null || !files.Any())
+        {
+          return NotFound($"No open files found for Lawyer with ID {lawyerId}.");
+        }
+
+        return Ok(files);  // Returnează fișierele deschise
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Error retrieving open files for Lawyer with ID {lawyerId}: {ex.Message}");
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
 
 
 
-  }
+
+    }
 }

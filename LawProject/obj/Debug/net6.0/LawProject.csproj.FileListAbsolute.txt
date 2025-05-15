@@ -154,14 +154,6 @@ C:\Users\DIANA BUTA\source\repos\AddIn\Web\LawProject\LawProject\obj\Debug\net6.
 C:\Users\DIANA BUTA\source\repos\AddIn\Web\LawProject\LawProject\obj\Debug\net6.0\LawProject.pdb
 C:\Users\DIANA BUTA\source\repos\AddIn\Web\LawProject\LawProject\obj\Debug\net6.0\LawProject.genruntimeconfig.cache
 C:\Users\DIANA BUTA\source\repos\AddIn\Web\LawProject\LawProject\obj\Debug\net6.0\ref\LawProject.dll
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.csproj.AssemblyReference.cache
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.AssemblyInfoInputs.cache
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.AssemblyInfo.cs
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.csproj.CoreCompileInputs.cache
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.sourcelink.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\appsettings.Development.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\appsettings.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Connected Services\ServiceReference1\ConnectedService.json
@@ -322,6 +314,14 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\runtimes\win\l
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Text.Encoding.CodePages.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.csproj.AssemblyReference.cache
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.AssemblyInfoInputs.cache
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.AssemblyInfo.cs
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.csproj.CoreCompileInputs.cache
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\LawProject.sourcelink.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\staticwebassets.build.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\staticwebassets.development.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\obj\Debug\net6.0\staticwebassets\msbuild.LawProject.Microsoft.AspNetCore.StaticWebAssets.props

@@ -193,6 +193,23 @@ namespace LawProject.Service.EventService
       return result;
     }
 
+    public async Task<IEnumerable<EventA>> GetEventAByClient(int clientId, string clientType)
+    {
+      return await _dbContext.EventsA
+     .Where(t => t.ClientType == clientType && t.ClientId == clientId)
+     .ToListAsync();
+
+    }
+
+    public async Task<IEnumerable<EventC>> GetEventCByClient(int clientId, string clientType)
+    {
+      return await _dbContext.EventsC
+     .Where(t => t.ClientType == clientType && t.ClientId == clientId)
+     .ToListAsync();
+
+    }
+
+
     public async Task<List<EventCDTO>> GetAllEventsCAsync()
     {
       var events = await _dbContext.EventsC.Include(e => e.Lawyer).ToListAsync();

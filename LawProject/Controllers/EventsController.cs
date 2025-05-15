@@ -11,10 +11,12 @@ namespace LawProject.Controllers
   public class EventsController : ControllerBase
   {
     private readonly IEventService _eventService;
+    private readonly ILogger<TaskController> _logger;
 
-    public EventsController(IEventService eventService)
+    public EventsController(IEventService eventService, ILogger<TaskController> logger)
     {
       _eventService = eventService;
+      _logger = logger;
     }
 
     // Adaugă un eveniment Audiere
@@ -67,6 +69,37 @@ namespace LawProject.Controllers
       }
       return Ok(eventsA);
     }
+
+
+    [HttpGet("AudierebyClientId")]
+    public async Task<ActionResult<IEnumerable<EventADTO>>> GetEventAbyClientId(int clientId, string clientType)
+    {
+      try
+      {
+        var eventsA = await _eventService.GetEventAByClient(clientId, clientType);
+        return Ok(eventsA);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru clientul cu ID {clientId}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+    [HttpGet("ConsultantabyClientId")]
+    public async Task<ActionResult<IEnumerable<EventADTO>>> GetEventCbyClientId(int clientId, string clientType)
+    {
+      try
+      {
+        var eventsA = await _eventService.GetEventCByClient(clientId, clientType);
+        return Ok(eventsA);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru clientul cu ID {clientId}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
 
 
     // Obține evenimentele C(consultanta)

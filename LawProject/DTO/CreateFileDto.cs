@@ -13,7 +13,7 @@ namespace LawProject.DTO
     public int ClientId { get; set; }
     public string ClientType { get; set; }
     public string? ClientName { get; set; }
-    public string Source { get; set; }
+    public string Source { get; set; } = string.Empty;
     public string? Details { get; set; } = string.Empty;
     public string Moneda { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
@@ -21,6 +21,10 @@ namespace LawProject.DTO
     public string? Instanta { get; set; } = string.Empty;
     public string Onorariu {  get; set; } = string.Empty;
     public string OnorariuRestant { get; set; } = string.Empty;
+
+    public string? CuvantCheie { get; set; } = string.Empty;
+
+    public string Outcome {  get; set; } = string.Empty; 
     public string Delegatie { get; set; } = string.Empty;
     public string NumarContract { get; set; } = string.Empty;
 

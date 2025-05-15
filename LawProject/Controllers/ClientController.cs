@@ -11,12 +11,14 @@ namespace LawProject.Controllers
   public class ClientController : ControllerBase
   {
     public readonly ApplicationDbContext _context;
+    private readonly ILogger<TaskController> _logger;
     public readonly IClientService _clientService;
 
-    public ClientController(ApplicationDbContext context, IClientService clientService)
+    public ClientController(ApplicationDbContext context, IClientService clientService, ILogger<TaskController> logger)
     {
       _context = context;
       _clientService = clientService;
+      _logger = logger;
     }
 
     // Obține persoanele fizice
@@ -72,5 +74,24 @@ namespace LawProject.Controllers
         return StatusCode(StatusCodes.Status500InternalServerError, $"Eroare: {ex.Message}");
       }
     }
+
+    [HttpGet("fisa-client")]
+    public async Task<IActionResult> GetFisaClientDetaliata(
+    [FromQuery] int clientId,
+    [FromQuery] string clientType,
+    [FromQuery] string clientName)
+    {
+      try
+      {
+        var fisa = await _clientService.GetFisaClientDetaliataAsync(clientId, clientType, clientName);
+        return Ok(fisa);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la generarea fișei clientului: {ex.Message}");
+        return StatusCode(500, "Eroare la generarea fișei clientului.");
+      }
+    }
+
   }
 }
