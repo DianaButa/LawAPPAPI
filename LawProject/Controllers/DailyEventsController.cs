@@ -43,6 +43,23 @@ namespace LawProject.Controllers
     }
 
 
+
+
+    [HttpGet("by-fileNumber")]
+    public async Task<ActionResult<List<DailyEventsDto>>> GetDailyEventAbyFileNumber(string fileNumber)
+    {
+      try
+      {
+        var events = await _dailyEventService.GetEventsByFileNumber(fileNumber);
+        return Ok(events);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru clientul cu ID {fileNumber}: {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
     [HttpGet("DailybyClientId")]
     public async Task<ActionResult<IEnumerable<EventADTO>>> GetDailyEventCbyClientId(string clientName)
     {

@@ -1,7 +1,10 @@
 using LawProject.Database;
 using LawProject.DTO;
+using LawProject.Migrations;
 using LawProject.Models;
 using LawProject.Service.DailyEventService;
+using LawProject.Service.FileService;
+using LawProject.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Service.RaportService
@@ -10,10 +13,15 @@ namespace LawProject.Service.RaportService
   {
     private readonly ApplicationDbContext _context;
     private readonly IDailyEventService _dailyEventService;
-    public RaportService(ApplicationDbContext context, IDailyEventService dailyEventService)
+    private readonly IFileManagementService _fileService;
+    private readonly ITaskService _taskService;
+
+    public RaportService(ApplicationDbContext context, IDailyEventService dailyEventService, ITaskService taskService, IFileManagementService fileManagementService)
     {
       _context = context;
       _dailyEventService = dailyEventService;
+      _taskService = taskService;
+      _fileService = fileManagementService;
     }
 
     public async Task<int> CreateRaportAsync(RaportCreateDto dto)
@@ -52,13 +60,11 @@ namespace LawProject.Service.RaportService
             throw new ArgumentException($"Tipul clientului este invalid: {dto.ClientType}. Se acceptă doar 'PF' sau 'PJ'.");
         }
       }
-
-      // Creare obiect Raport
       var raport = new Raport
       {
         LawyerId = dto.LawyerId,
         LawyerName = lawyer.LawyerName, 
-        DataRaport = DateTime.Now,
+        DataRaport = dto.Date,
         ClientId = dto.ClientId,
         ClientType = dto.ClientType,
         ClientName = clientName,
@@ -106,6 +112,15 @@ namespace LawProject.Service.RaportService
           .FirstOrDefaultAsync(r => r.Id == id);
     }
 
+
+    public async Task<Raport?> GetRaportByFileNumberAsync(string fileNumber)
+    {
+      return await _context.Rapoarte
+          .Include(r => r.TaskuriLucrate)
+          .ThenInclude(rt => rt.WorkTask)
+          .FirstOrDefaultAsync(r => r.FileNumber == fileNumber);
+    }
+
     public async Task<List<RaportGeneralDto>> GetRapoarteGeneraleAsync()
     {
       var dailyEvents = await _dailyEventService.GetAllDailyEventsAsync();
@@ -136,6 +151,7 @@ namespace LawProject.Service.RaportService
         ClientType = r.ClientType,
         ClientId = r.ClientId,
         LawyerId = r.LawyerId,
+        Date = r.Date,
         LawyerName = r.LawyerName,
         OreDeplasare = r.OreDeplasare,
         OreStudiu = r.OreStudiu,
@@ -179,6 +195,7 @@ namespace LawProject.Service.RaportService
           ClientType = r.ClientType,
           ClientId = r.ClientId,
           LawyerId = r.LawyerId,
+          Date = r.Date,
           LawyerName = r.LawyerName,
           OreDeplasare = r.OreDeplasare,
           OreStudiu = r.OreStudiu,

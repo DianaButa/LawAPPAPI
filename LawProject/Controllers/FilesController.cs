@@ -103,13 +103,23 @@ namespace LawProject.Controllers
       }
     }
 
-
-
-
-
-
-
-
+    [HttpGet("by-fileNumber")]
+    public async Task<IActionResult> GetFileByFileNumber(string fileNumber)
+    {
+      try
+      {
+        var file = await _fileManagementService.GetFileByNumberAsync(fileNumber);
+        if (file == null)
+        {
+          return NotFound($"File with number {fileNumber} not found");
+        }
+        return Ok(file);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal Server Error: {ex.Message}");
+      }
+    }
 
 
 
@@ -193,6 +203,8 @@ namespace LawProject.Controllers
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
+
+
 
 
 

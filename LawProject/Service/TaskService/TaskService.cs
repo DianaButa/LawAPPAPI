@@ -156,6 +156,8 @@ namespace LawProject.Service.TaskService
 
 
 
+
+
     public async Task<IEnumerable<WorkTask>> GetTasksByLawyerIdAsync(int lawyerId)
     {
       return await _context.Tasks
@@ -189,6 +191,23 @@ namespace LawProject.Service.TaskService
 
       return tasks;
     }
+
+    public async Task<List<WorkTask>> GetTasksByFileNumberAndOpenStatusAsync(string fileNumber)
+    {
+      return await _context.Tasks
+              .Where(t => t.FileNumber == fileNumber && t.Status == "open")
+              .ToListAsync();
+    }
+
+
+    public async Task<List<WorkTask>> GetTasksByFileNumberAndClosedStatusAsync(string fileNumber)
+    {
+      return await _context.Tasks
+              .Where(t => t.FileNumber == fileNumber && t.Status == "closed")
+              .ToListAsync();
+    }
+
+
     public async Task<List<WorkTask>> GetTasksByLawyerIdAndClosedStatusAsync(int lawyerId)
     {
       var tasks = await _context.Tasks

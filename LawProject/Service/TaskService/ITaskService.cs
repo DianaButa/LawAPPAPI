@@ -21,6 +21,10 @@ namespace LawProject.Service.TaskService
 
     Task<List<WorkTask>> GetTasksByLawyerIdAndOpenStatusAsync(int lawyerId);
 
+    Task<List<WorkTask>> GetTasksByFileNumberAndClosedStatusAsync(string fileNumber);
+
+    Task<List<WorkTask>> GetTasksByFileNumberAndOpenStatusAsync(string fileNumber);
+
 
     Task<WorkTask> EditTaskAsync(int taskId, CreateTaskDto dto);
     Task<bool> DeleteTaskAsync(int taskId);

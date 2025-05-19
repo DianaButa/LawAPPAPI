@@ -10,5 +10,6 @@ namespace LawProject.Service.DailyEventService
     Task<List<DailyEventsDto>> GetDailyEventsByLawyerIdAsync(int lawyerId);
 
     Task<IEnumerable<DailyEventsDto>> GetEventsByClient(string clientName);
+    Task<List<DailyEventsDto>> GetEventsByFileNumber(string fileNumber);
   }
 }

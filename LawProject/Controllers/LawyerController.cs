@@ -74,6 +74,13 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("fisa-avocat")]
+    public async Task<IActionResult> GetLawyerDashboardData([FromQuery] int lawyerId)
+    {
+      var result = await _lawyerService.GetLawyerDashboardDataAsync(lawyerId);
+      return Ok(result);
+    }
+
 
   }
 }

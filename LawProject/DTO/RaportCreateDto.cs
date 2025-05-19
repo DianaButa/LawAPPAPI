@@ -16,6 +16,8 @@ namespace LawProject.DTO
     public double OreDeplasare { get; set; }
     public double OreStudiu { get; set; }
 
+    public DateTime Date { get; set; }
+
     public List<RaportTaskDto> Taskuri { get; set; } = new();
   }
 }

@@ -10,5 +10,7 @@ namespace LawProject.Service.ClientService
     Task AddClientPJ(ClientPJDto clientDTO);
 
     Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName);
+
+    Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber);
   }
 }

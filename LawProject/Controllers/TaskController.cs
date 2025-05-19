@@ -135,6 +135,36 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("by-fileNumber/open")]
+    public async Task<IActionResult> GetTaskByFileNuberOpen([FromQuery] string fileNumber)
+    {
+      try
+      {
+        var tasks = await _taskService.GetTasksByFileNumberAndOpenStatusAsync(fileNumber);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru dosarul cu nr {fileNumber} și status 'open': {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpGet("by-fileNumber/closed")]
+    public async Task<IActionResult> GetTaskByFileNuberClosed([FromQuery] string fileNumber)
+    {
+      try
+      {
+        var tasks = await _taskService.GetTasksByFileNumberAndClosedStatusAsync(fileNumber);
+        return Ok(tasks);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la obținerea task-urilor pentru dosarul cu nr {fileNumber} și status 'open': {ex.Message}");
+        return BadRequest(ex.Message);
+      }
+    }
+
 
     [HttpGet("by-lawyer/closed")]
     public async Task<IActionResult> GetTasksByLawyerIdClosed([FromQuery] int lawyerId)

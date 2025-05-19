@@ -1,7 +1,10 @@
 using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
+using LawProject.Service.DailyEventService;
+using LawProject.Service.FileService;
 using LawProject.Service.RaportService;
+using LawProject.Service.TaskService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +17,18 @@ namespace LawProject.Controllers
     private readonly ApplicationDbContext _context;
     private readonly ILogger<TaskController> _logger;
     private readonly IRaportService _raportService;
-    public RaportController(ApplicationDbContext context, IRaportService raportService, ILogger<TaskController> logger)
+    private readonly IFileManagementService _fileService;
+    private readonly ITaskService _taskService;
+    private readonly IDailyEventService _dailyEventService;
+  
+    public RaportController(ApplicationDbContext context, IRaportService raportService, ILogger<TaskController> logger, IFileManagementService fileService, ITaskService taskService, IDailyEventService dailyEventService)
     {
       _context = context;
       _raportService = raportService;
       _logger = logger;
+      _fileService = fileService;
+      _taskService = taskService;
+      _dailyEventService= dailyEventService;
     }
 
     [HttpPost]
@@ -39,6 +49,16 @@ namespace LawProject.Controllers
     public async Task<IActionResult> GetById(int id)
     {
       var raport = await _raportService.GetRaportByIdAsync(id);
+      if (raport == null)
+        return NotFound();
+
+      return Ok(raport);
+    }
+
+    [HttpGet("fileNumber")]
+    public async Task<IActionResult> GetRaportByFileNumber(string fileNumber)
+    {
+      var raport = await _raportService.GetRaportByFileNumberAsync(fileNumber);
       if (raport == null)
         return NotFound();
 
@@ -75,6 +95,10 @@ namespace LawProject.Controllers
       var result = await _raportService.GetRapoarteGeneraleByLawyerAsync(lawyerId);
       return Ok(result);
     }
+
+
+
+
 
 
   }

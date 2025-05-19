@@ -5,6 +5,7 @@ using LawProject.Service.DailyEventService;
 using LawProject.Service.FileService;
 using LawProject.Service.RaportService;
 using LawProject.Service.TaskService;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Service.ClientService
@@ -107,7 +108,32 @@ namespace LawProject.Service.ClientService
         Rapoarte = rapoarte
       };
     }
+    public async Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber)
+    {
+
+
+      var events = await _dailyEventService.GetEventsByFileNumber(fileNumber);
+      var closedTasks = await _taskService.GetTasksByFileNumberAndClosedStatusAsync(fileNumber);
+      var openedTasks = await _taskService.GetTasksByFileNumberAndOpenStatusAsync(fileNumber);
+      var raport = await _raportService.GetRaportByFileNumberAsync(fileNumber);
+
+      var rapoarte = raport != null ? new List<Raport> { raport } : new List<Raport>();
+
+      return new FullFileDataDto
+      {
+        FileNumber = fileNumber,
+        DailyEvents = events,
+        ClosedTasks = closedTasks,
+        OpenedTasks= openedTasks,
+        Rapoarte = rapoarte
+      };
+    }
 
 
   }
+
+
+
+
 }
+

@@ -93,5 +93,30 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpGet("activitate-dosar")]
+    public async Task<IActionResult> GetAllDataByFileNumber([FromQuery] string fileNumber)
+    {
+      var decodedFileNumber = Uri.UnescapeDataString(fileNumber);
+      var data = await _clientService.GetFullDataByFileNumberAsync(decodedFileNumber);
+
+      if (data == null)
+        return NotFound($"No data found for file number: {decodedFileNumber}");
+
+      return Ok(new
+      {
+        data.FileNumber,
+        data.FilesCount,
+        data.DailyEventsCount,
+        data.ClosedTasksCount,
+        data.OpenedTasksCount,
+        data.RapoarteCount,
+        data.Files,
+        data.DailyEvents,
+        data.ClosedTasks,
+        data.OpenedTasks,
+        data.Rapoarte
+      });
+    }
+
   }
 }

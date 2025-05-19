@@ -2,6 +2,7 @@ using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ServiceModel;
 
 namespace LawProject.Service.DailyEventService
 {
@@ -19,7 +20,7 @@ namespace LawProject.Service.DailyEventService
       var newDailyEvent = new DailyEvents
       {
         FileNumber = Dto.FileNumber,
-        Date = DateTime.UtcNow,
+        Date = Dto.Date,
         Institutie = Dto.Institutie,
         ClientName = Dto.ClientName,
         ClientType = Dto.ClientType,
@@ -95,6 +96,28 @@ namespace LawProject.Service.DailyEventService
     {
       return await _context.DailyEvents
         .Include(e => e.Lawyer)
+        .Select(e => new DailyEventsDto
+        {
+          Id = e.Id,
+          FileNumber = e.FileNumber,
+          Date = e.Date,
+          Institutie = e.Institutie,
+          Descriere = e.Descriere,
+          ClientName = e.ClientName,
+          ClientId = e.ClientId,
+          ClientType = e.ClientType,
+          LawyerId = e.LawyerId,
+          LawyerName = e.Lawyer.LawyerName,
+          AllocatedHours = e.AllocatedHours
+        })
+        .ToListAsync();
+    }
+
+    public async Task<List<DailyEventsDto>> GetEventsByFileNumber(string fileNumber)
+    {
+      return await _context.DailyEvents
+      .Include(e => e.Lawyer)
+         .Where(e => e.FileNumber.ToLower().Contains(fileNumber.ToLower()))
         .Select(e => new DailyEventsDto
         {
           Id = e.Id,

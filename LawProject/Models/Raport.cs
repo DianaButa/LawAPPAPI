@@ -23,6 +23,7 @@ namespace LawProject.Models
     public string? FileNumber { get; set; }
 
     public DateTime DataRaport { get; set; }
+    public DateTime Date { get; set; }
 
     public int? WorkTaskId { get; set; }
 

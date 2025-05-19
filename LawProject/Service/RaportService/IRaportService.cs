@@ -13,5 +13,7 @@ namespace LawProject.Service.RaportService
 
     Task<List<RaportGeneralDto>> GetRapoarteGeneraleByLawyerAsync(int lawyerId);
     Task<List<Raport>> GetRapoarteByClientAsync(int clientId, string clientType);
+    Task<Raport?> GetRaportByFileNumberAsync(string fileNumber);
+   
   }
 }

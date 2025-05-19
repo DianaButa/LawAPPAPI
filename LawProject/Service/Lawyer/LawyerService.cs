@@ -2,6 +2,7 @@ using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
 using LawProject.Service.FileService;
+using LawProject.Service.RaportService;
 using LawProject.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,13 +13,15 @@ namespace LawProject.Service.Lawyer
     private readonly ApplicationDbContext _context;
     private readonly IFileManagementService _fileService;
     private readonly ITaskService _taskService;
+    private readonly IRaportService _raportService;
 
     public LawyerService(ApplicationDbContext context, IFileManagementService fileService,
-        ITaskService taskService )
+        ITaskService taskService, IRaportService raportService )
     {
       _context = context;
       _fileService = fileService;
       _taskService = taskService;
+      _raportService = raportService;
     }
 
     public async Task<IEnumerable<LawyerDto>> GetAllLawyersAsync()
@@ -114,6 +117,23 @@ namespace LawProject.Service.Lawyer
       }
 
       return lawyerOverviews;
+    }
+
+    public async Task<LawyerDashboardDto> GetLawyerDashboardDataAsync(int lawyerId)
+    {
+      var files = (await _fileService.GetFilesByLawyerIdAsync(lawyerId))?.ToList() ?? new();
+      var openTasks = (await _taskService.GetTasksByLawyerIdAndOpenStatusAsync(lawyerId))?.ToList() ?? new();
+      var closedTasks = (await _taskService.GetTasksByLawyerIdAndClosedStatusAsync(lawyerId))?.ToList() ?? new();
+      var rapoarte = (await _raportService.GetRapoarteGeneraleByLawyerAsync(lawyerId))?.ToList() ?? new();
+
+      return new LawyerDashboardDto
+      {
+        LawyerId = lawyerId,
+        Files = files,
+        OpenTasks = openTasks,
+        ClosedTasks = closedTasks,
+        RapoarteGenerale = rapoarte
+      };
     }
 
 
