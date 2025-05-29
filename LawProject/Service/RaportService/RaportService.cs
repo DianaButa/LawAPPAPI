@@ -26,56 +26,38 @@ namespace LawProject.Service.RaportService
 
     public async Task<int> CreateRaportAsync(RaportCreateDto dto)
     {
-      // Obține avocatul
+      // Verifică dacă avocatul există
       var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == dto.LawyerId);
       if (lawyer == null)
         throw new ArgumentException($"Avocatul cu ID {dto.LawyerId} nu a fost găsit.");
 
-      // Inițializare date client
-      string clientName = null;
-
-      if (dto.ClientId.HasValue && !string.IsNullOrEmpty(dto.ClientType))
-      {
-        var clientType = dto.ClientType.ToUpper();
-
-        switch (clientType)
-        {
-          case "PF":
-            var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == dto.ClientId.Value);
-            if (clientPF == null)
-              throw new ArgumentException($"Clientul fizic cu ID {dto.ClientId.Value} nu a fost găsit.");
-
-            clientName = $"{clientPF.FirstName} {clientPF.LastName}";
-            break;
-
-          case "PJ":
-            var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == dto.ClientId.Value);
-            if (clientPJ == null)
-              throw new ArgumentException($"Clientul juridic cu ID {dto.ClientId.Value} nu a fost găsit.");
-
-            clientName = clientPJ.CompanyName;
-            break;
-
-          default:
-            throw new ArgumentException($"Tipul clientului este invalid: {dto.ClientType}. Se acceptă doar 'PF' sau 'PJ'.");
-        }
-      }
+      // Construiește raportul
       var raport = new Raport
       {
         LawyerId = dto.LawyerId,
-        LawyerName = lawyer.LawyerName, 
-        DataRaport = dto.Date,
-        ClientId = dto.ClientId,
-        ClientType = dto.ClientType,
-        ClientName = clientName,
-        FileId = dto.FileId,
-        FileNumber = dto.FileNumber,
+        LawyerName = lawyer.LawyerName,
+        DataRaport = dto.DataRaport,
         OreDeplasare = dto.OreDeplasare,
-        OreStudiu = dto.OreStudiu,
+        OreInstanta = dto.OreInstanta,
+        OreAudieri = dto.OreAudieri,
+        OreConsultante = dto.OreConsultante,
+        OreAlteActivitati = dto.OreAlteActivitati,
+
+        // Taskuri multiple
         TaskuriLucrate = dto.Taskuri?.Select(t => new RaportTask
         {
           WorkTaskId = t.WorkTaskId,
-          OreLucrate = t.OreLucrate
+          WorkTaskTitle=t.WorkTaskTitle,
+          WorkTaskFileNumber = t.WorkTaskFileNumber,
+          OreLucrate = t.OreLucrate ?? 0
+        }).ToList(),
+
+        // Studii pe dosare multiple
+        StudiiPeDosar = dto.StudiiPeDosar?.Select(s => new RaportStudiuDosar
+        {
+          FileId = s.FileId ?? 0,
+          FileNumber = s.FileNumber,
+          OreStudiu = s.OreStudiu ?? 0
         }).ToList()
       };
 
@@ -85,40 +67,100 @@ namespace LawProject.Service.RaportService
       return raport.Id;
     }
 
-
-    public async Task<List<Raport>> GetAllRapoarteAsync()
+    public async Task<List<RaportDto>> GetAllRapoarteAsync()
     {
-      return await _context.Rapoarte
-          .Include(r => r.TaskuriLucrate)
-          .ThenInclude(rt => rt.WorkTask)
-          .ToListAsync();
+      var rapoarte = await _context.Rapoarte
+        .Include(r => r.TaskuriLucrate)
+        .Include(r => r.StudiiPeDosar)
+        .Include(r => r.Lawyer)
+        .ToListAsync();
+
+      var result = rapoarte.Select(r => new RaportDto
+      {
+        Id = r.Id,
+        LawyerName = r.Lawyer?.LawyerName ?? "",
+        LawyerId = r.LawyerId,
+        DataRaport = r.DataRaport,
+        OreDeplasare = r.OreDeplasare,
+        OreInstanta = r.OreInstanta,
+        OreAudieri = r.OreAudieri,
+        OreConsultante = r.OreConsultante,
+        OreAlteActivitati = r.OreAlteActivitati,
+
+        Taskuri = r.TaskuriLucrate?.Select(t => new RaportTaskDto
+        {
+          WorkTaskId = t.WorkTaskId,
+          WorkTaskTitle=t.WorkTaskTitle,
+          WorkTaskFileNumber = t.WorkTaskFileNumber,
+          OreLucrate = t.OreLucrate
+        }).ToList() ?? new List<RaportTaskDto>(),
+
+        StudiiPeDosar = r.StudiiPeDosar?.Select(s => new RaportStudiuDosarDto
+        {
+          FileId = s.FileId,
+          FileNumber = s.FileNumber,
+          OreStudiu = s.OreStudiu
+        }).ToList() ?? new List<RaportStudiuDosarDto>()
+      }).ToList();
+
+      return result;
     }
 
-    public async Task<List<Raport>> GetRapoarteByClientAsync(int clientId, string clientType)
+    public async Task<List<RaportDto>> GetRapoarteByLawyerIdAsync(int lawyerId)
     {
-      return await _context.Rapoarte
-          .Include(r => r.TaskuriLucrate)
-          .ThenInclude(rt => rt.WorkTask)
-          .Where(r => r.ClientId == clientId && r.ClientType == clientType)
-          .ToListAsync();
+      var rapoarte = await _context.Rapoarte
+        .Where(r => r.LawyerId == lawyerId)
+        .Include(r => r.TaskuriLucrate)
+        .Include(r => r.StudiiPeDosar)
+        .Include(r => r.Lawyer)
+        .ToListAsync();
+
+      var result = rapoarte.Select(r => new RaportDto
+      {
+        Id = r.Id,
+        LawyerName = r.Lawyer?.LawyerName ?? "",
+        LawyerId = r.LawyerId,
+        DataRaport = r.DataRaport,
+        OreDeplasare = r.OreDeplasare,
+        OreInstanta = r.OreInstanta,
+        OreAudieri = r.OreAudieri,
+        OreConsultante = r.OreConsultante,
+        OreAlteActivitati = r.OreAlteActivitati,
+
+        Taskuri = r.TaskuriLucrate?.Select(t => new RaportTaskDto
+        {
+          WorkTaskId = t.WorkTaskId,
+          WorkTaskTitle=t.WorkTaskTitle,
+          WorkTaskFileNumber=t.WorkTaskFileNumber,
+          OreLucrate = t.OreLucrate
+        }).ToList() ?? new List<RaportTaskDto>(),
+
+        StudiiPeDosar = r.StudiiPeDosar?.Select(s => new RaportStudiuDosarDto
+        {
+          FileId = s.FileId,
+          FileNumber = s.FileNumber,
+          OreStudiu = s.OreStudiu
+        }).ToList() ?? new List<RaportStudiuDosarDto>()
+      }).ToList();
+
+      return result;
     }
 
 
     public async Task<Raport?> GetRaportByIdAsync(int id)
     {
       return await _context.Rapoarte
-          .Include(r => r.TaskuriLucrate)
-          .ThenInclude(rt => rt.WorkTask)
-          .FirstOrDefaultAsync(r => r.Id == id);
+        .Include(r => r.TaskuriLucrate)
+        .ThenInclude(rt => rt.WorkTask)
+        .FirstOrDefaultAsync(r => r.Id == id);
     }
-
 
     public async Task<Raport?> GetRaportByFileNumberAsync(string fileNumber)
     {
       return await _context.Rapoarte
-          .Include(r => r.TaskuriLucrate)
-          .ThenInclude(rt => rt.WorkTask)
-          .FirstOrDefaultAsync(r => r.FileNumber == fileNumber);
+        .Include(r => r.TaskuriLucrate)
+        .ThenInclude(rt => rt.WorkTask)
+        .FirstOrDefaultAsync(r => r.FileNumber == fileNumber);
     }
 
     public async Task<List<RaportGeneralDto>> GetRapoarteGeneraleAsync()
@@ -136,7 +178,7 @@ namespace LawProject.Service.RaportService
         Descriere = e.Descriere,
         ClientName = e.ClientName,
         ClientId = e.ClientId,
-        ClientType=e.ClientType,
+        ClientType = e.ClientType,
         LawyerId = e.LawyerId,
         LawyerName = e.LawyerName,
         AllocatedHours = e.AllocatedHours,
@@ -148,24 +190,34 @@ namespace LawProject.Service.RaportService
       {
         TipRaport = "Raport",
         RaportId = r.Id,
-        ClientType = r.ClientType,
-        ClientId = r.ClientId,
         LawyerId = r.LawyerId,
-        Date = r.Date,
         LawyerName = r.LawyerName,
+        Date = r.DataRaport != DateTime.MinValue ? r.DataRaport : r.Date, 
+
         OreDeplasare = r.OreDeplasare,
         OreStudiu = r.OreStudiu,
-        TaskuriLucrate = r.TaskuriLucrate.Select(t => t.WorkTask.FileNumber).ToList(),
+        OreInstanta = r.OreInstanta,
+        OreAudieri = r.OreAudieri,
+        OreConsultante = r.OreConsultante,
+        OreAlteActivitati = r.OreAlteActivitati,
+
+        TaskuriLucrate = r.Taskuri ?? new List<RaportTaskDto>(),
+
+        StudiiPeDosar = r.StudiiPeDosar ?? new List<RaportStudiuDosarDto>(),
+
+        // Optional poți adăuga alte câmpuri dacă ai în DTO-ul general
       });
 
       return dailyEventDtos.Concat(raportDtos).ToList();
     }
+
 
     public async Task<List<RaportGeneralDto>> GetRapoarteGeneraleByLawyerAsync(int lawyerId)
     {
       var dailyEvents = await _dailyEventService.GetAllDailyEventsAsync();
       var rapoarte = await GetAllRapoarteAsync();
 
+      // DAILY EVENTS filtrate
       var dailyEventDtos = dailyEvents
         .Where(e => e.LawyerId == lawyerId)
         .Select(e => new RaportGeneralDto
@@ -186,26 +238,37 @@ namespace LawProject.Service.RaportService
           EventType = e.EventType
         });
 
+      // RAPOARTE filtrate
       var raportDtos = rapoarte
-        .Where(r => r.LawyerId == lawyerId)
-        .Select(r => new RaportGeneralDto
-        {
-          TipRaport = "Raport",
-          RaportId = r.Id,
-          ClientType = r.ClientType,
-          ClientId = r.ClientId,
-          LawyerId = r.LawyerId,
-          Date = r.Date,
-          LawyerName = r.LawyerName,
-          OreDeplasare = r.OreDeplasare,
-          OreStudiu = r.OreStudiu,
-          TaskuriLucrate = r.TaskuriLucrate.Select(t => t.WorkTask.FileNumber).ToList(),
-        });
+   .Where(r => r.LawyerId == lawyerId)
+   .Select(r => new RaportGeneralDto
+   {
+     TipRaport = "Raport",
+     RaportId = r.Id,
+     LawyerId = r.LawyerId,
+     LawyerName = r.LawyerName,
+     Date = r.DataRaport,
+
+     OreDeplasare = r.OreDeplasare,
+     OreStudiu = r.OreStudiu,
+     OreInstanta = r.OreInstanta,
+     OreAudieri = r.OreAudieri,
+     OreConsultante = r.OreConsultante,
+     OreAlteActivitati = r.OreAlteActivitati,
+
+     // Extragere ID-uri taskuri
+     TaskuriLucrate = r.Taskuri ?? new List<RaportTaskDto>(),
+
+     StudiiPeDosar = r.StudiiPeDosar?.Select(s => new RaportStudiuDosarDto
+     {
+       FileId = s.FileId,
+       FileNumber = s.FileNumber,
+       OreStudiu = s.OreStudiu
+     }).ToList() ?? new List<RaportStudiuDosarDto>()
+   });
 
       return dailyEventDtos.Concat(raportDtos).ToList();
     }
 
-
   }
 }
-

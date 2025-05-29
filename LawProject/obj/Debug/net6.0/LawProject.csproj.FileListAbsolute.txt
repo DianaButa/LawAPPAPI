@@ -162,6 +162,7 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\LawProject.dep
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\LawProject.runtimeconfig.json
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\LawProject.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\LawProject.pdb
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\BCrypt.Net-Next.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\BouncyCastle.Cryptography.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\DocumentFormat.OpenXml.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\DocumentFormat.OpenXml.Framework.dll
@@ -184,6 +185,7 @@ C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.svg.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itext.commons.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\itextsharp.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\MailKit.dll
+C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.Connections.Abstractions.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\DIANA BUTA\source\LawProject\LawProject\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.Core.dll

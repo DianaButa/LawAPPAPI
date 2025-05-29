@@ -6,6 +6,7 @@ using Hangfire.SqlServer;
 using LawProject.Configurations;
 using LawProject.Database;
 using LawProject.Service;
+using LawProject.Service.AccountService;
 using LawProject.Service.ClientService;
 using LawProject.Service.ContractService;
 using LawProject.Service.DailyEventService;
@@ -16,12 +17,17 @@ using LawProject.Service.ICCJ;
 using LawProject.Service.InvoiceSerices;
 using LawProject.Service.Lawyer;
 using LawProject.Service.Notifications;
+using LawProject.Service.POSService;
 using LawProject.Service.RaportService;
 using LawProject.Service.ReceiptService;
 using LawProject.Service.TaskService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PdfSharp.Charting;
 using ServiceReference1;
+using System.Security.Cryptography;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +78,8 @@ builder.Services.AddScoped<FileToCalendarService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ILawyerService, LawyerService>();
+builder.Services.AddScoped<IPOSService, POSService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddScoped<MyQueryService>();
@@ -88,6 +96,25 @@ builder.Services.AddSignalR();
 builder.Services.AddLogging();
 builder.Services.ConfigureCors();
 builder.Services.AddControllers();
+
+builder.Services.AddAuthentication(options =>
+{
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = builder.Configuration["JWT:Issuer"],
+    ValidAudience = builder.Configuration["JWT:Audience"],
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+  };
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -103,6 +130,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
@@ -119,3 +147,5 @@ RecurringJob.AddOrUpdate<FileToCalendarService>(
     service => service.ProcessAllFilesAsync(),     
     Cron.HourInterval(1));
 app.Run();
+
+

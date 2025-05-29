@@ -5,8 +5,10 @@ using LawProject.Service.DailyEventService;
 using LawProject.Service.FileService;
 using LawProject.Service.RaportService;
 using LawProject.Service.TaskService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
@@ -32,16 +34,48 @@ namespace LawProject.Controllers
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateRaport( RaportCreateDto dto)
+    [Authorize]
+    public async Task<IActionResult> CreateRaport(RaportCreateDto dto)
     {
+      var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+      if (userIdClaim == null)
+      {
+        return Unauthorized("UserId missing in token.");
+      }
+      int userId = int.Parse(userIdClaim.Value);
+
+      var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.UserId == userId);
+      if (lawyer == null)
+      {
+        return BadRequest("Nu există avocat asociat acestui cont.");
+      }
+
+      // Setăm LawyerId doar dacă nu este deja trimis
+      if (dto.LawyerId == null || dto.LawyerId == 0)
+      {
+        dto.LawyerId = lawyer.Id;
+      }
+
       var id = await _raportService.CreateRaportAsync(dto);
       return Ok(new { Id = id });
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
       var rapoarte = await _raportService.GetAllRapoarteAsync();
+      return Ok(rapoarte);
+    }
+
+    [HttpGet("lawyer")]
+    public async Task<ActionResult<List<RaportDto>>> GetRapoarteByLawyerId(int lawyerId)
+    {
+      var rapoarte = await _raportService.GetRapoarteByLawyerIdAsync(lawyerId);
+      if (rapoarte == null || !rapoarte.Any())
+      {
+        return NotFound($"Nu s-au găsit rapoarte pentru avocatul cu ID-ul {lawyerId}.");
+      }
       return Ok(rapoarte);
     }
 
@@ -65,20 +99,20 @@ namespace LawProject.Controllers
       return Ok(raport);
     }
 
-    [HttpGet("byClientId")]
-    public async Task<IActionResult> GetRapoarteByClient([FromQuery] int clientId, [FromQuery] string clientType)
-    {
-      try
-      {
-        var rapoarte = await _raportService.GetRapoarteByClientAsync(clientId, clientType);
-        return Ok(rapoarte);
-      }
-      catch (Exception ex)
-      {
-        _logger.LogError($"Eroare la obținerea rapoartelor pentru client: {ex.Message}");
-        return StatusCode(500, "Eroare internă la preluarea rapoartelor.");
-      }
-    }
+    //[HttpGet("byClientId")]
+    //public async Task<IActionResult> GetRapoarteByClient([FromQuery] int clientId, [FromQuery] string clientType)
+    //{
+    //  try
+    //  {
+    //    var rapoarte = await _raportService.GetRapoarteByClientAsync(clientId, clientType);
+    //    return Ok(rapoarte);
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    _logger.LogError($"Eroare la obținerea rapoartelor pentru client: {ex.Message}");
+    //    return StatusCode(500, "Eroare internă la preluarea rapoartelor.");
+    //  }
+    //}
 
 
     [HttpGet("getRapoarteGenerale")]

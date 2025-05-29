@@ -10,6 +10,6 @@ namespace LawProject.Service.Lawyer
     Task<LawyerOverviewDto> GetOverviewByLawyerIdAsync(int lawyerId);
 
     Task<List<LawyerOverviewDto>> GetAllLawyerOverviewsAsync();
-    Task<LawyerDashboardDto> GetLawyerDashboardDataAsync(int lawyerId);
+    Task<LawyerDashboardDto> GetLawyerDashboardDataAsync(int lawyerId, DateTime? startDate, DateTime? endDate);
   }
 }

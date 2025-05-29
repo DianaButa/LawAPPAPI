@@ -1,6 +1,7 @@
 using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
+using LawProject.Service.DailyEventService;
 using LawProject.Service.FileService;
 using LawProject.Service.RaportService;
 using LawProject.Service.TaskService;
@@ -14,14 +15,16 @@ namespace LawProject.Service.Lawyer
     private readonly IFileManagementService _fileService;
     private readonly ITaskService _taskService;
     private readonly IRaportService _raportService;
+    private readonly IDailyEventService _dailyEventService;
 
     public LawyerService(ApplicationDbContext context, IFileManagementService fileService,
-        ITaskService taskService, IRaportService raportService )
+        ITaskService taskService, IRaportService raportService, IDailyEventService dailyEventService )
     {
       _context = context;
       _fileService = fileService;
       _taskService = taskService;
       _raportService = raportService;
+      _dailyEventService = dailyEventService;
     }
 
     public async Task<IEnumerable<LawyerDto>> GetAllLawyersAsync()
@@ -105,6 +108,7 @@ namespace LawProject.Service.Lawyer
         {
           LawyerId = lawyer.Id,
           LawyerName = lawyer.LawyerName,
+          LawyerColor=lawyer.Color,
           OpenFilesCount = openFiles.Count,
           ClosedFilesCount = closedFiles.Count,
           OpenTasksCount = openTasks.Count,
@@ -119,22 +123,44 @@ namespace LawProject.Service.Lawyer
       return lawyerOverviews;
     }
 
-    public async Task<LawyerDashboardDto> GetLawyerDashboardDataAsync(int lawyerId)
+    public async Task<LawyerDashboardDto> GetLawyerDashboardDataAsync(int lawyerId, DateTime? startDate, DateTime? endDate)
     {
       var files = (await _fileService.GetFilesByLawyerIdAsync(lawyerId))?.ToList() ?? new();
       var openTasks = (await _taskService.GetTasksByLawyerIdAndOpenStatusAsync(lawyerId))?.ToList() ?? new();
       var closedTasks = (await _taskService.GetTasksByLawyerIdAndClosedStatusAsync(lawyerId))?.ToList() ?? new();
-      var rapoarte = (await _raportService.GetRapoarteGeneraleByLawyerAsync(lawyerId))?.ToList() ?? new();
+      var dailyEvents = (await _dailyEventService.GetDailyEventsByLawyerIdAsync(lawyerId))?.ToList() ?? new();
+      var rapoarte = (await _raportService.GetRapoarteByLawyerIdAsync(lawyerId))?.ToList() ?? new();
+
+      if (startDate.HasValue && endDate.HasValue)
+      {
+        dailyEvents = dailyEvents
+          .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
+          .ToList();
+
+        openTasks = openTasks
+          .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+          .ToList();
+
+        closedTasks = closedTasks
+          .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+          .ToList();
+
+        rapoarte = rapoarte
+          .Where(r => r.DataRaport >= startDate.Value && r.DataRaport <= endDate.Value)
+          .ToList();
+      }
 
       return new LawyerDashboardDto
       {
         LawyerId = lawyerId,
         Files = files,
+        DailyEvents = dailyEvents,
         OpenTasks = openTasks,
         ClosedTasks = closedTasks,
-        RapoarteGenerale = rapoarte
+        Raport = rapoarte
       };
     }
+
 
 
 

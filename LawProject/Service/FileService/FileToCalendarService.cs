@@ -211,6 +211,7 @@ namespace LawProject.Service.FileService
             Timestamp = DateTime.UtcNow,
             Type = "hearing_changes",
             FileNumber = dosar.Numar,
+            Source=dosarDb.Source,
             IsRead = false,
             Details = string.Join("\n", changes),
             UserId = 1
@@ -389,6 +390,7 @@ namespace LawProject.Service.FileService
             Timestamp = DateTime.UtcNow,
             Type = "hearing_changes",
             FileNumber = dosar.numar,
+            Source=dosarDb.Source,
             IsRead = false,
             Details = string.Join("\n", changes),
             UserId = 1 // You might want to get this from the current user context

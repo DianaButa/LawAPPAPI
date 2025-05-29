@@ -18,14 +18,17 @@ namespace LawProject.Service.ClientService
     private readonly ITaskService _taskService;
     private readonly IDailyEventService _dailyEventService;
     private readonly IRaportService _raportService;
+    private readonly ILogger<ClientService> _logger;
 
-    public ClientService(ApplicationDbContext context, IFileManagementService fileManagementService, ITaskService taskService, IDailyEventService dailyEventService, IRaportService raportService)
+
+    public ClientService(ApplicationDbContext context, IFileManagementService fileManagementService, ITaskService taskService, IDailyEventService dailyEventService, IRaportService raportService, ILogger<ClientService> logger)
     {
       _context = context;
       _fileManagementService = fileManagementService;
       _taskService = taskService;
       _dailyEventService = dailyEventService;
       _raportService = raportService;
+      _logger = logger;
     }
 
     public async Task<IEnumerable<DailyEventDto>> GetAllPFAsync()
@@ -90,12 +93,23 @@ namespace LawProject.Service.ClientService
       await _context.SaveChangesAsync();
     }
 
-    public async Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName)
+    public async Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName, DateTime? startDate, DateTime? endDate)
     {
-      var files = await _fileManagementService.GetFilesForClientAsync(clientId); 
-      var dailyEvents = await _dailyEventService.GetEventsByClient(clientName); 
+      var files = await _fileManagementService.GetFilesForClientAsync(clientId);
+      var dailyEvents = await _dailyEventService.GetEventsByClient(clientName);
       var closedTasks = await _taskService.GetClosedTasksByClient(clientId, clientType);
-      var rapoarte = await _raportService.GetRapoarteByClientAsync(clientId, clientType);
+
+      // 🔎 Aplică filtrarea pe baza intervalului primit
+      if (startDate.HasValue && endDate.HasValue)
+      {
+        dailyEvents = dailyEvents
+            .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
+            .ToList();
+
+        closedTasks = closedTasks
+            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+            .ToList();
+      }
 
       return new FisaClientDetaliataDto
       {
@@ -104,13 +118,15 @@ namespace LawProject.Service.ClientService
         ClientName = clientName,
         Files = files,
         DailyEvents = dailyEvents,
-        ClosedTasks = closedTasks,
-        Rapoarte = rapoarte
+        ClosedTasks = closedTasks
       };
     }
-    public async Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber)
-    {
 
+
+    public async Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber, DateTime? startDate, DateTime? endDate)
+    {
+      var file = await _fileManagementService.GetFileByNumberAsync(fileNumber);
+      var fileStatus = file?.Status;
 
       var events = await _dailyEventService.GetEventsByFileNumber(fileNumber);
       var closedTasks = await _taskService.GetTasksByFileNumberAndClosedStatusAsync(fileNumber);
@@ -119,21 +135,121 @@ namespace LawProject.Service.ClientService
 
       var rapoarte = raport != null ? new List<Raport> { raport } : new List<Raport>();
 
+      if (startDate.HasValue && endDate.HasValue)
+      {
+        events = events
+            .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
+            .ToList();
+
+        closedTasks = closedTasks
+            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+            .ToList();
+
+        openedTasks = openedTasks
+            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+            .ToList();
+
+        rapoarte = rapoarte
+            .Where(r => r.DataRaport >= startDate.Value && r.DataRaport <= endDate.Value)
+            .ToList();
+      }
+
       return new FullFileDataDto
       {
         FileNumber = fileNumber,
+        FileStatus = fileStatus,
         DailyEvents = events,
         ClosedTasks = closedTasks,
-        OpenedTasks= openedTasks,
+        OpenedTasks = openedTasks,
         Rapoarte = rapoarte
       };
     }
 
 
+    public async Task UpdateClientPJ(int clientId, ClientPJDto clientDto)
+    {
+      var client = await _context.ClientPJs.FindAsync(clientId);
+      if (client == null) throw new Exception("Clientul nu a fost găsit.");
+
+      client.CompanyName = clientDto.CompanyName;
+      client.CUI = clientDto.CUI;
+      client.Email = clientDto.Email;
+      client.Address = clientDto.Address;
+      client.PhoneNumber = clientDto.PhoneNumber;
+
+      await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateClientPF(int clientId, DailyEventDto clientDto)
+    {
+      var client = await _context.ClientPFs.FindAsync(clientId);
+      if (client == null) throw new Exception("Clientul nu a fost găsit.");
+
+      client.FirstName = clientDto.FirstName;
+      client.LastName = clientDto.LastName;
+      client.CNP = clientDto.CNP;
+      client.Email = clientDto.Email;
+      client.Address = clientDto.Address;
+      client.PhoneNumber = clientDto.PhoneNumber;
+
+      await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteClientPF(int clientId)
+    {
+      var client = await _context.ClientPFs.FindAsync(clientId);
+      if (client == null) throw new Exception("Clientul nu a fost găsit.");
+
+      _context.ClientPFs.Remove(client);
+      await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteClientPJ(int clientId)
+    {
+      var client = await _context.ClientPJs.FindAsync(clientId);
+      if (client == null) throw new Exception("Clientul nu a fost găsit.");
+
+      _context.ClientPJs.Remove(client);
+      await _context.SaveChangesAsync();
+    }
+
+    public async Task<object> GetClientEntityByIdAndTypeAsync(int clientId, string clientType)
+    {
+      clientType = clientType?.Trim();
+
+      if (string.IsNullOrEmpty(clientType) || (clientType != "PF" && clientType != "PJ"))
+        throw new ArgumentException("Tip client invalid. Se acceptă doar 'PF' sau 'PJ'.");
+
+      if (clientId <= 0)
+        throw new ArgumentException("ID-ul clientului trebuie să fie un număr pozitiv.");
+
+      _logger.LogInformation($"Caut client cu ID={clientId}, Tip={clientType}");
+
+      if (clientType == "PF")
+      {
+        var clientPF = await _context.ClientPFs.FindAsync(clientId);
+        if (clientPF == null)
+        {
+          _logger.LogWarning($"Client PF cu ID={clientId} nu a fost găsit.");
+          return null;
+        }
+        return clientPF;
+      }
+      else // clientType == "PJ"
+      {
+        var clientPJ = await _context.ClientPJs.FindAsync(clientId);
+        if (clientPJ == null)
+        {
+          _logger.LogWarning($"Client PJ cu ID={clientId} nu a fost găsit.");
+          return null;
+        }
+        return clientPJ;
+      }
+    }
+
+
+
   }
-
-
-
 
 }
 

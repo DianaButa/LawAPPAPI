@@ -239,7 +239,7 @@ namespace LawProject.Controllers
       }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("EDIT")]
     public async Task<IActionResult> EditFile(int id, [FromBody] CreateFileDto dto)
     {
       try
@@ -273,10 +273,11 @@ namespace LawProject.Controllers
     {
       try
       {
-        if (closeFileDto.Outcome != "Castigat" && closeFileDto.Outcome != "Necastigat")
+        if (closeFileDto.Outcome != "Castigat" && closeFileDto.Outcome != "Necastigat" && closeFileDto.Outcome != "Neutru")
         {
-          return BadRequest("Rezultatul trebuie să fie 'Castigat' sau 'Necastigat'.");
+          return BadRequest("Rezultatul trebuie să fie 'Castigat', 'Necastigat' sau 'Neutru'.");
         }
+
         await _fileManagementService.CloseFileAsync(id, closeFileDto.Outcome);
 
         return Ok(new { Message = "Fișierul a fost închis cu succes." });

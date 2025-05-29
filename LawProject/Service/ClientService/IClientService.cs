@@ -9,8 +9,16 @@ namespace LawProject.Service.ClientService
     Task AddClientPF(DailyEventDto clientDTO);
     Task AddClientPJ(ClientPJDto clientDTO);
 
-    Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName);
+    Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber, DateTime? startDate, DateTime? endDate);
+    Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName, DateTime? startDate, DateTime? endDate);
 
-    Task<FullFileDataDto> GetFullDataByFileNumberAsync(string fileNumber);
+
+    Task UpdateClientPF(int clientId, DailyEventDto clientDto);
+    Task UpdateClientPJ(int clientId, ClientPJDto clientDto);
+    Task DeleteClientPF(int clientId);
+    Task DeleteClientPJ(int clientId);
+
+    Task<object> GetClientEntityByIdAndTypeAsync(int clientId, string clientType);
+
   }
 }

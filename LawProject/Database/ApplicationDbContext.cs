@@ -32,6 +32,7 @@ namespace LawProject.Database
 
     public DbSet<Receipt> Receipts { get; set; }
 
+    public DbSet<POS> POSs { get; set; }
     public DbSet<Lawyer> Lawyers { get; set; }
     public DbSet<EventA> EventsA { get; set; }
 

@@ -145,12 +145,16 @@ namespace LawProject.Service.InvoiceSerices
     public async Task<List<InvoiceDto>> GetAllInvoicesAsync()
     {
       var invoices = await _dbContext.Invoices
-          .Include(i => i.Receipts) 
+          .Include(i => i.Receipts)
+          .Include(i => i.POSs) 
           .ToListAsync();
 
       var result = invoices.Select(invoice =>
       {
-        var sumaPlatita = invoice.Receipts.Sum(r => r.Suma);
+        var sumaPlatitaReceipts = invoice.Receipts.Sum(r => r.Suma);
+        var sumaPlatitaPOS = invoice.POSs.Sum(p => p.Suma);
+
+        var sumaPlatita = sumaPlatitaReceipts + sumaPlatitaPOS;
 
         return new InvoiceDto
         {
@@ -158,7 +162,7 @@ namespace LawProject.Service.InvoiceSerices
           ClientName = invoice.ClientName ?? string.Empty,
           AdresaClient = invoice.AdresaClient ?? string.Empty,
           ClientType = invoice.ClientType ?? string.Empty,
-          FileNumber= invoice.FileNumber ?? string.Empty,
+          FileNumber = invoice.FileNumber ?? string.Empty,
           Denumire = invoice.Denumire ?? string.Empty,
           Cantitate = invoice.Cantitate,
           PretUnitar = invoice.PretUnitar,
@@ -178,6 +182,7 @@ namespace LawProject.Service.InvoiceSerices
     }
 
 
+
     public async Task<Invoice> GetInvoiceByIdAsync(int id)
     {
       // Găsim factura pe baza ID-ului
@@ -192,14 +197,15 @@ namespace LawProject.Service.InvoiceSerices
       var azi = DateTime.Today;
 
       var facturi = await _dbContext.Invoices
-          .Include(f => f.Receipts)
-          .Where(f => f.DataScadenta >= azi)
+          .Include(f => f.Receipts)  
+          .Include(f => f.POSs)    
+          .Where(f => f.DataScadenta <= azi) 
           .ToListAsync();
 
       var restante = facturi
           .Select(f =>
           {
-            var sumaPlatita = f.Receipts.Sum(r => r.Suma);
+            var sumaPlatita = (f.Receipts?.Sum(r => r.Suma) ?? 0) + (f.POSs?.Sum(p => p.Suma) ?? 0);
             var sumaNeachitata = f.SumaFinala - sumaPlatita;
 
             return new InvoiceDto
@@ -223,11 +229,12 @@ namespace LawProject.Service.InvoiceSerices
               SumaNeachitata = sumaNeachitata
             };
           })
-          .Where(f => f.SumaNeachitata > 0)
+          .Where(f => f.SumaNeachitata > 0) 
           .ToList();
 
       return restante;
     }
+
 
 
 

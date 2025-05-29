@@ -1,23 +1,29 @@
 namespace LawProject.DTO
 {
-  public class RaportCreateDto
-  {
+ 
+    public class RaportCreateDto
+    {
+      public int LawyerId { get; set; }
+      public DateTime DataRaport { get; set; }
 
-    public int LawyerId { get; set; }
-    public DateTime DataRaport { get; set; }
+      public double OreDeplasare { get; set; }
+      public double OreInstanta { get; set; }
+      public double OreAudieri { get; set; }
+      public double OreConsultante { get; set; }
+      public double OreAlteActivitati { get; set; }
 
-    public int? ClientId { get; set; }
-    public string? ClientName { get; set; }
-    public string? ClientType {  get; set; }
-    public int? FileId { get; set; }
+      // ✅ Taskuri multiple
+      public List<RaportTaskDto>? Taskuri { get; set; } = new();
 
-    public string? FileNumber { get; set; }
+      // ✅ Ore studiu pentru dosare multiple
+      public List<RaportStudiuDosarDto>? StudiiPeDosar { get; set; } = new();
+    }
 
-    public double OreDeplasare { get; set; }
-    public double OreStudiu { get; set; }
-
-    public DateTime Date { get; set; }
-
-    public List<RaportTaskDto> Taskuri { get; set; } = new();
+    public class RaportStudiuDosarDto
+    {
+      public int? FileId { get; set; }
+      public string? FileNumber { get; set; }
+      public double? OreStudiu { get; set; }
+    }
   }
-}
+

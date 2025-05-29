@@ -19,5 +19,7 @@ namespace LawProject.Models
     public bool IsRead { get; set; }
     public string Details { get; set; } = string.Empty;
     public int UserId { get; set; }
+
+    public string? Source { get; set; }
   }
 }

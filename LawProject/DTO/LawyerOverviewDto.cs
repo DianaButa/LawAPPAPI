@@ -6,6 +6,7 @@ namespace LawProject.DTO
   {
     public int LawyerId { get; set; }
     public string LawyerName { get; set; }
+    public string LawyerColor { get; set; }
 
     public List<CreateFileDto> OpenFiles { get; set; }
     public List<CreateFileDto> ClosedFiles { get; set; }

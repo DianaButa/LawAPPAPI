@@ -1,8 +1,10 @@
 using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Service.DailyEventService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
@@ -24,22 +26,34 @@ namespace LawProject.Controllers
 
 
     [HttpPost]
-    public async Task<ActionResult> AddDailyEvent( DailyEventsDto dto)
+    [Authorize]
+    public async Task<ActionResult> AddDailyEvent(DailyEventsDto dto)
     {
       if (dto == null)
       {
         return BadRequest("Datele evenimentului sunt invalide.");
       }
 
+      var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+      if (userIdClaim == null)
+      {
+        return Unauthorized("UserId missing in token.");
+      }
+
+      int userId = int.Parse(userIdClaim.Value);
+
+      // Caută avocatul asociat userului
+      var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.UserId == userId);
+      if (lawyer == null)
+      {
+        return BadRequest("Avocatul asociat user-ului nu a fost găsit.");
+      }
+
+      // Setează lawyerId în DTO
+      dto.LawyerId = lawyer.Id;
+
       await _dailyEventService.AddDailyEventAsync(dto);
       return Ok("Eveniment adăugat cu succes.");
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<List<DailyEventsDto>>> GetAllDailyEvents()
-    {
-      var events = await _dailyEventService.GetAllDailyEventsAsync();
-      return Ok(events);
     }
 
 

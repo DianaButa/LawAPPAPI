@@ -59,5 +59,10 @@ namespace LawProject.Service.EmailService
       await smtpClient.SendAsync(email);
       await smtpClient.DisconnectAsync(true);
     }
+
+    public async Task SendEmailResetare(string toEmail, string subject, string body)
+    {
+      // Logica de trimitere email (ex: SMTP, SendGrid, etc.)
+    }
   }
 }

@@ -40,7 +40,7 @@ namespace LawProject.Service.FileService
         Timestamp = DateTime.UtcNow,
         Type = "event_updated",
         FileNumber = scheduledEvent.FileNumber,
-        
+        Source=scheduledEvent.Source,
         IsRead = false,
         Details = $"Data: {scheduledEvent.StartTime:dd.MM.yyyy HH:mm}, Tip: {scheduledEvent.TipDosar}",
         UserId = 1 // TODO: Get from current user context
@@ -88,6 +88,7 @@ namespace LawProject.Service.FileService
         Timestamp = DateTime.UtcNow,
         Type = "event_scheduled",
         FileNumber = scheduledEvent.FileNumber,
+        Source=scheduledEvent.Source,
         IsRead = false,
         Details = $"Data: {scheduledEvent.StartTime:dd.MM.yyyy HH:mm}, Tip: {scheduledEvent.TipDosar}",
         UserId = 1 // TODO: Get from current user context
@@ -324,6 +325,7 @@ namespace LawProject.Service.FileService
           Type = "new_file",
           FileNumber = dto.FileNumber,
           IsRead = false,
+          Source=dto.Source,
           Details = $"Client: {file.ClientName}, Tip dosar: {dto.TipDosar}",
           UserId = 1 
         };
@@ -364,11 +366,12 @@ namespace LawProject.Service.FileService
       fileToClose.Status = "închis";
 
       // Setăm rezultatul (Castigat sau Necastigat)
-      if (outcome != "Castigat" && outcome != "Necastigat")
+      if (outcome != "Castigat" && outcome != "Necastigat" && outcome != "Neutru")
       {
         _logger.LogError($"Outcome value is invalid: {outcome}");
         throw new ArgumentException($"Rezultatul {outcome} este invalid.");
       }
+
 
       fileToClose.Outcome = outcome;
       _context.Files.Update(fileToClose);
@@ -424,6 +427,7 @@ namespace LawProject.Service.FileService
             Instanta=d.Instanta,
             Source=d.Source,
             Outcome=d.Outcome,
+            Status=d.Status,
             Details = d.Details,
             NumarContract=d.NumarContract,
             Delegatie=d.Delegatie,
@@ -619,6 +623,8 @@ namespace LawProject.Service.FileService
             Id = d.Id,
             FileNumber = d.FileNumber,
             ClientName = d.ClientName,
+            ClientType=d.ClientType,
+            Status= d.Status,
             Source=d.Source,
             CuvantCheie=d.CuvantCheie,
             TipDosar = d.TipDosar,

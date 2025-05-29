@@ -13,7 +13,7 @@ namespace LawProject.DTO
     public int ClientId { get; set; }
     public string ClientType { get; set; }
     public string? ClientName { get; set; }
-    public string Source { get; set; } = string.Empty;
+    public string? Source { get; set; } = string.Empty;
     public string? Details { get; set; } = string.Empty;
     public string Moneda { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;

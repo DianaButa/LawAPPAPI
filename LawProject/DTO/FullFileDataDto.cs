@@ -5,6 +5,7 @@ using System.Linq;
 public class FullFileDataDto
 {
   public string FileNumber { get; set; }
+  public string FileStatus { get; set; }
   public List<CreateFileDto> Files { get; set; } = new();
   public List<DailyEventsDto> DailyEvents { get; set; } = new();
   public List<WorkTask> ClosedTasks { get; set; } = new();

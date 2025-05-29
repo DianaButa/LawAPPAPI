@@ -16,10 +16,12 @@ namespace LawProject.Models
 
     public int ClientId { get; set; }
 
-    public string Source { get; set; } = string.Empty;
+    public string? Source { get; set; } = string.Empty;
 
     public string? CuvantCheie { get; set; }= string.Empty;
     public int? ClientPFId { get; set; }
+
+    public string? ClientType {  get; set; } = string.Empty;
     public virtual ClientPF ClientPF { get; set; }
 
     public int? ClientPJId { get; set; }

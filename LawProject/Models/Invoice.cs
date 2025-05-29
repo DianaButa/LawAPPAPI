@@ -28,6 +28,8 @@ namespace LawProject.Models
 
     public string? NumarFactura { get; set; }
 
+
+    public virtual List<POS> POSs { get; set; } = new();
     public virtual List<Receipt> Receipts { get; set; } = new();
 
   }

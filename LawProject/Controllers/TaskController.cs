@@ -1,25 +1,32 @@
+using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Service.TaskService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
   [Route("api/[controller]")]
+
   [ApiController]
   public class TaskController : ControllerBase
   {
 
     private readonly ITaskService _taskService;
     private readonly ILogger<TaskController> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public TaskController(ITaskService taskService, ILogger<TaskController> logger)
+    public TaskController(ITaskService taskService, ILogger<TaskController> logger, ApplicationDbContext context)
     {
       _taskService = taskService;
       _logger = logger;
+      _context = context;
     }
 
     [HttpPost("create")]
+    [Authorize]
     public async Task<IActionResult> CreateTask([FromBody] CreateTaskDto dto)
     {
       if (!ModelState.IsValid)
@@ -29,6 +36,24 @@ namespace LawProject.Controllers
 
       try
       {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+          return Unauthorized("UserId missing in token.");
+        }
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        if (dto.LawyerId == 0)
+        {
+          var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.UserId == userId);
+          if (lawyer == null)
+          {
+            return BadRequest("Lawyer for the current user not found.");
+          }
+          dto.LawyerId = lawyer.Id;
+        }
+
         var taskCreated = await _taskService.CreateTaskAsync(dto);
         return Ok(taskCreated);
       }
@@ -38,6 +63,7 @@ namespace LawProject.Controllers
         return BadRequest(ex.Message);
       }
     }
+
 
     [HttpPut("close/{id}")]
     public async Task<IActionResult> CloseTask(int id, [FromBody] CloseTaskDto dto)
