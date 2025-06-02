@@ -32,5 +32,9 @@ namespace LawProject.Models
     public virtual List<POS> POSs { get; set; } = new();
     public virtual List<Receipt> Receipts { get; set; } = new();
 
+    public bool IsCanceled { get; set; } = false;
+    public bool IsStorned { get; set; } = false;
+    public int? StornedInvoiceId { get; set; }
+
   }
 }

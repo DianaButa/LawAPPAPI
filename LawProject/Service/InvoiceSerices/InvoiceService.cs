@@ -234,6 +234,66 @@ namespace LawProject.Service.InvoiceSerices
 
       return restante;
     }
+    public async Task<Invoice> StornareFacturaAsync(int invoiceId)
+    {
+      var originalInvoice = await _dbContext.Invoices.FindAsync(invoiceId);
+
+      if (originalInvoice == null)
+        throw new ArgumentException($"Factura cu ID-ul {invoiceId} nu a fost găsită.");
+
+      if (originalInvoice.IsStorned)
+        throw new InvalidOperationException("Factura este deja stornată.");
+
+      // Creăm factura stornă
+      var stornoInvoice = new Invoice
+      {
+        ClientId = originalInvoice.ClientId,
+        ClientType = originalInvoice.ClientType,
+        ClientName = originalInvoice.ClientName,
+        AdresaClient = originalInvoice.AdresaClient,
+        CNP = originalInvoice.CNP,
+        CUI = originalInvoice.CUI,
+
+        Denumire = originalInvoice.Denumire + " (Stornare)",
+        Cantitate = -originalInvoice.Cantitate,
+        PretUnitar = originalInvoice.PretUnitar,
+        TVAProcent = originalInvoice.TVAProcent,
+        Moneda = originalInvoice.Moneda,
+        FileId = originalInvoice.FileId,
+        FileNumber = originalInvoice.FileNumber,
+        DataEmitere = DateTime.Now,
+        DataScadenta = DateTime.Now.AddDays(30),
+        NumarFactura = GenerateInvoiceNumber(),
+        SumaFinala = -originalInvoice.SumaFinala,
+
+        IsStorned = false, // factura stornă nu e storno, ci este o factură normală care anulează pe cea veche
+        StornedInvoiceId = originalInvoice.Id
+      };
+
+      originalInvoice.IsStorned = true;
+
+      _dbContext.Invoices.Update(originalInvoice);
+      _dbContext.Invoices.Add(stornoInvoice);
+
+      await _dbContext.SaveChangesAsync();
+
+      return stornoInvoice;
+    }
+    public async Task CancelInvoiceAsync(int invoiceId)
+    {
+      var invoice = await _dbContext.Invoices.FindAsync(invoiceId);
+
+      if (invoice == null)
+        throw new ArgumentException($"Factura cu ID-ul {invoiceId} nu a fost găsită.");
+
+      if (invoice.IsCanceled)
+        throw new InvalidOperationException("Factura este deja anulată.");
+
+      invoice.IsCanceled = true;
+
+      _dbContext.Invoices.Update(invoice);
+      await _dbContext.SaveChangesAsync();
+    }
 
 
 

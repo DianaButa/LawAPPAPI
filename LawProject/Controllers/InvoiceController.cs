@@ -98,5 +98,20 @@ namespace LawProject.Controllers
       }
     }
 
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelInvoice(int id)
+    {
+      await _invoiceService.CancelInvoiceAsync(id);
+      return Ok();
+    }
+
+    [HttpPost("{id}/stornare")]
+    public async Task<IActionResult> StornareFactura(int id)
+    {
+      var stornoInvoice = await _invoiceService.StornareFacturaAsync(id);
+      return Ok(stornoInvoice);
+    }
+
+
   }
 }

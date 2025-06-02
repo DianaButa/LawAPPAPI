@@ -13,6 +13,8 @@ namespace LawProject.Service.InvoiceSerices
     Task<Invoice> GetInvoiceByIdAsync(int id);
 
     Task<IEnumerable<InvoiceDto>> GetInvoicesByDataScadentaAsync();
+    Task CancelInvoiceAsync(int invoiceId);
+    Task<Invoice> StornareFacturaAsync(int invoiceId);
   }
   }
 

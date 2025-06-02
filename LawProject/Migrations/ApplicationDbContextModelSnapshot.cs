@@ -383,6 +383,12 @@ namespace LawProject.Migrations
                     b.Property<string>("FileNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsCanceled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsStorned")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Moneda")
                         .HasColumnType("nvarchar(max)");
 
@@ -391,6 +397,9 @@ namespace LawProject.Migrations
 
                     b.Property<decimal>("PretUnitar")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("StornedInvoiceId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("SumaFinala")
                         .HasColumnType("decimal(18,2)");
@@ -1088,7 +1097,7 @@ namespace LawProject.Migrations
             modelBuilder.Entity("LawProject.Models.POS", b =>
                 {
                     b.HasOne("LawProject.Models.Invoice", "Factura")
-                        .WithMany()
+                        .WithMany("POSs")
                         .HasForeignKey("InvoiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1166,6 +1175,8 @@ namespace LawProject.Migrations
 
             modelBuilder.Entity("LawProject.Models.Invoice", b =>
                 {
+                    b.Navigation("POSs");
+
                     b.Navigation("Receipts");
                 });
 
