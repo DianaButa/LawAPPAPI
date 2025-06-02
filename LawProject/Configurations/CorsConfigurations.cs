@@ -12,6 +12,7 @@ namespace LawProject.Configurations
               builder.AllowAnyOrigin()
                              .AllowAnyHeader()
                              .AllowAnyMethod();
+
             });
       });
 

@@ -20,6 +20,14 @@ namespace LawProject.Controllers
       _logger = logger;
     }
 
+
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllNotifications()
+    {
+      var notifications = await _notificationService.GetAllNotificationsAsync();
+      return Ok(notifications);
+    }
     [HttpGet]
     public async Task<ActionResult<List<Notification>>> GetUserNotifications()
     {

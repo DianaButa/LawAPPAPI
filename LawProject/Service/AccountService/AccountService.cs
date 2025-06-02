@@ -38,7 +38,9 @@ namespace LawProject.Service.AccountService
         UserName = userDto.UserName,
         Email = userDto.Email,
         PasswordHash = hashedPassword,
-        IsValidated = true // sau false dacă vrei confirmare email
+        IsValidated = true ,
+        Role = userDto.Role ?? "User"
+
       };
 
       _context.Users.Add(newUser);
@@ -82,7 +84,8 @@ namespace LawProject.Service.AccountService
       {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));

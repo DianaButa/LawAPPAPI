@@ -16,7 +16,7 @@ namespace LawProject.Models
 
     public int ClientId { get; set; }
 
-    public string? Source { get; set; } = string.Empty;
+    public string? Source { get; set; } 
 
     public string? CuvantCheie { get; set; }= string.Empty;
     public int? ClientPFId { get; set; }

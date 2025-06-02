@@ -1,5 +1,6 @@
 using LawProject.DTO;
 using LawProject.Service.InvoiceSerices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace LawProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
+  [Authorize(Roles = "Secretariat,Manager")]
   public class InvoiceController : ControllerBase
   {
     private readonly IInvoiceService _invoiceService;

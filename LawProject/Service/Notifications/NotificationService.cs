@@ -58,26 +58,16 @@ namespace LawProject.Service.Notifications
       }
     }
 
-    public async Task<List<Notification>> GetUserNotificationsAsync(int userId, int page = 1, int pageSize = 10)
+    public async Task<List<Notification>> GetUserNotificationsAsync(int userId)
     {
-      try
-      {
-        var notifications = await _context.Notifications
-            .Where(n => n.UserId == userId)
-            .OrderByDescending(n => n.Timestamp)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+      var notifications = await _context.Notifications
+          .Where(n => n.UserId == userId)
+          .OrderByDescending(n => n.Timestamp)
+          .ToListAsync();
 
-        _logger.LogInformation($"Retrieved {notifications.Count} notifications for user {userId}");
-        return notifications;
-      }
-      catch (Exception ex)
-      {
-        _logger.LogError(ex, $"Error retrieving notifications for user {userId}");
-        throw;
-      }
+      return notifications;
     }
+
 
     public async Task<List<Notification>> GetNotificationsByTypeAsync(int userId, string type, int page = 1, int pageSize = 10)
     {
@@ -98,6 +88,16 @@ namespace LawProject.Service.Notifications
         _logger.LogError(ex, $"Error retrieving notifications of type {type} for user {userId}");
         throw;
       }
+    }
+
+
+    public async Task<List<Notification>> GetAllNotificationsAsync()
+    {
+      var notifications = await _context.Notifications
+          .OrderByDescending(n => n.Timestamp)
+          .ToListAsync();
+
+      return notifications;
     }
 
     public async Task<List<Notification>> GetNotificationsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate)

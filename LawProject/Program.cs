@@ -10,6 +10,7 @@ using LawProject.Service.AccountService;
 using LawProject.Service.ClientService;
 using LawProject.Service.ContractService;
 using LawProject.Service.DailyEventService;
+using LawProject.Service.DelegatieService;
 using LawProject.Service.EmailService;
 using LawProject.Service.EventService;
 using LawProject.Service.FileService;
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IIccjService, IccjService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRaportService, RaportService>();
 builder.Services.AddScoped<IContractService, ContractService>();
+builder.Services.AddScoped<IDelegatieService, DelegatieService>();
 builder.Services.AddScoped<IDailyEventService,DailyEventService>();
 builder.Services.AddScoped<IFileManagementService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
@@ -96,6 +98,8 @@ builder.Services.AddSignalR();
 builder.Services.AddLogging();
 builder.Services.ConfigureCors();
 builder.Services.AddControllers();
+
+
 
 builder.Services.AddAuthentication(options =>
 {

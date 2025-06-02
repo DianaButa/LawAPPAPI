@@ -16,6 +16,8 @@ namespace LawProject.Models
     public string? ResetToken { get; set; }
     public DateTime? ResetTokenExpiry { get; set; }
 
+    public string Role { get; set; } = "User"; 
+
     public virtual Lawyer Lawyer { get; set; }
 
 

@@ -99,20 +99,7 @@ namespace LawProject.Controllers
       return Ok(raport);
     }
 
-    //[HttpGet("byClientId")]
-    //public async Task<IActionResult> GetRapoarteByClient([FromQuery] int clientId, [FromQuery] string clientType)
-    //{
-    //  try
-    //  {
-    //    var rapoarte = await _raportService.GetRapoarteByClientAsync(clientId, clientType);
-    //    return Ok(rapoarte);
-    //  }
-    //  catch (Exception ex)
-    //  {
-    //    _logger.LogError($"Eroare la obținerea rapoartelor pentru client: {ex.Message}");
-    //    return StatusCode(500, "Eroare internă la preluarea rapoartelor.");
-    //  }
-    //}
+ 
 
 
     [HttpGet("getRapoarteGenerale")]

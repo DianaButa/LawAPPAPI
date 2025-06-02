@@ -28,6 +28,7 @@ namespace LawProject.Controllers
 
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<AuthenticationResultDto> Login([FromBody] UserDto user)
     {
       return await _accountService.Login(user);

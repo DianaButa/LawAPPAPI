@@ -103,12 +103,10 @@ namespace LawProject.Service.FileService
     {
       _logger.LogInformation("Fetching all files from the database...");
 
-      // Preluăm toate fișierele din baza de date în memorie, cu avocații asociați
       var dbFiles = await _context.Files
         .Include(f => f.Lawyer)
         .ToListAsync();
 
-      // Proiectăm în CreateFileDto după ce datele sunt în memorie (IEnumerable)
       var basicDtos = dbFiles.Select(f => new CreateFileDto
       {
         Id = f.Id,
@@ -116,18 +114,16 @@ namespace LawProject.Service.FileService
         ClientName = f.ClientName,
         Details = f.Details,
         TipDosar = f.TipDosar,
-        Instanta=f.Instanta,
-        Status=f.Status,
-        Onorariu=f.Onorariu,
-        Outcome=f.Outcome,
-        Source=f.Source,
-        Moneda=f.Moneda,
-        OnorariuRestant=f.OnorariuRestant,
-        Delegatie=f.Delegatie,
-        DataScadenta=f.DataScadenta,
-        NumarContract=f.NumarContract,
-
-       
+        Instanta = f.Instanta,
+        Status = f.Status,
+        Onorariu = f.Onorariu,
+        Outcome = f.Outcome,
+        Source = f.Source,
+        Moneda = f.Moneda,
+        OnorariuRestant = f.OnorariuRestant,
+        Delegatie = f.Delegatie,
+        DataScadenta = f.DataScadenta,
+        NumarContract = f.NumarContract,
         LawyerName = f.Lawyer?.LawyerName ?? string.Empty,
         LawyerId = f.Lawyer?.Id
       }).ToList();
@@ -140,101 +136,155 @@ namespace LawProject.Service.FileService
 
       var combinedFilesList = new List<AllFilesDto>();
 
-      foreach (var dbFile in basicDtos)
+      // Separă dosarele JUST și restul
+      var justFiles = basicDtos.Where(f => f.Source?.ToUpper() == "JUST").ToList();
+      var otherFiles = basicDtos.Where(f => f.Source?.ToUpper() != "JUST").ToList();
+
+      // Adaugă direct dosarele non-JUST fără apel SOAP
+      combinedFilesList.AddRange(otherFiles.Select(f => new AllFilesDto
       {
-        _logger.LogInformation($"Fetching SOAP details for file number: {dbFile.FileNumber}");
+        Id = f.Id,
+        FileNumber = f.FileNumber,
+        ClientName = f.ClientName,
+        Details = f.Details,
+        Status = f.Status,
+        Onorariu = f.Onorariu,
+        Moneda = f.Moneda,
+        OnorariuRestant = f.OnorariuRestant,
+        Delegatie = f.Delegatie,
+        CuvantCheie = f.CuvantCheie,
+        NumarContract = f.NumarContract,
+        DataScadenta = f.DataScadenta,
+        OutCome = f.Outcome,
+        Source = f.Source,
+        TipDosar = f.TipDosar,
+        Instanta = f.Instanta,
+        LawyerName = f.LawyerName,
+        LawyerId = f.LawyerId
+      }));
 
-        var soapDosare = await _queryService.CautareDosareAsync(dbFile.FileNumber);
+      // Trimite apelurile SOAP pe batch-uri de 20
+      int batchSize = 20;
 
-        if (soapDosare == null || !soapDosare.Any())
+      for (int i = 0; i < justFiles.Count; i += batchSize)
+      {
+        var batch = justFiles.Skip(i).Take(batchSize);
+
+        var tasks = batch.Select(async dbFile =>
         {
-          _logger.LogWarning($"No SOAP details found for file number: {dbFile.FileNumber}");
+          _logger.LogInformation($"Fetching SOAP details for file number: {dbFile.FileNumber}");
 
-          combinedFilesList.Add(new AllFilesDto
+          var soapDosare = await _queryService.CautareDosareAsync(dbFile.FileNumber);
+
+          if (soapDosare == null || !soapDosare.Any())
+          {
+            _logger.LogWarning($"No SOAP details found for file number: {dbFile.FileNumber}");
+            return new AllFilesDto
+            {
+              Id = dbFile.Id,
+              FileNumber = dbFile.FileNumber,
+              ClientName = dbFile.ClientName,
+              Details = dbFile.Details,
+              Status = dbFile.Status,
+              Onorariu = dbFile.Onorariu,
+              Moneda = dbFile.Moneda,
+              OnorariuRestant = dbFile.OnorariuRestant,
+              Delegatie = dbFile.Delegatie,
+              CuvantCheie = dbFile.CuvantCheie,
+              NumarContract = dbFile.NumarContract,
+              DataScadenta = dbFile.DataScadenta,
+              OutCome = dbFile.Outcome,
+              Source = dbFile.Source,
+              TipDosar = dbFile.TipDosar,
+              Instanta = dbFile.Instanta,
+              LawyerName = dbFile.LawyerName,
+              LawyerId = dbFile.LawyerId
+            };
+          }
+
+          var mostRecentSoapDosar = soapDosare
+              .OrderByDescending(d => d.data)
+              .FirstOrDefault();
+
+          if (mostRecentSoapDosar != null)
+          {
+            return new AllFilesDto
+            {
+              Id = dbFile.Id,
+              FileNumber = dbFile.FileNumber,
+              ClientName = dbFile.ClientName,
+              Details = dbFile.Details,
+              TipDosar = dbFile.TipDosar,
+              Status = dbFile.Status,
+              Source = dbFile.Source,
+              LawyerName = dbFile.LawyerName,
+              Instanta = dbFile.Instanta,
+              LawyerId = dbFile.LawyerId,
+              Onorariu = dbFile.Onorariu,
+              Moneda = dbFile.Moneda,
+              CuvantCheie = dbFile.CuvantCheie,
+              OnorariuRestant = dbFile.OnorariuRestant,
+              Delegatie = dbFile.Delegatie,
+              NumarContract = dbFile.NumarContract,
+              DataScadenta = dbFile.DataScadenta,
+
+              Numar = mostRecentSoapDosar.numar,
+              Data = mostRecentSoapDosar.data,
+              Institutie = mostRecentSoapDosar.institutie.ToString(),
+              ObiectDosar = mostRecentSoapDosar.obiect.ToString(),
+              Parti = mostRecentSoapDosar.parti?.Select(p => new ParteDTO
+              {
+                Nume = p.nume,
+                CalitateParte = p.calitateParte
+              }).ToList(),
+              Sedinte = mostRecentSoapDosar.sedinte?.Select(s => new SedintaDTO
+              {
+                Complet = s.complet,
+                Data = s.data,
+                Ora = s.ora,
+                Solutie = s.solutie,
+                SolutieSumar = s.solutieSumar,
+                DataPronuntare = s.dataPronuntare,
+                DocumentSedinta = s.documentSedinta?.ToString() ?? string.Empty,
+                NumarDocument = s.numarDocument,
+                DataDocument = s.dataDocument
+              }).ToList()
+            };
+          }
+
+          // fallback, dacă nu există dosar în SOAP
+          return new AllFilesDto
           {
             Id = dbFile.Id,
             FileNumber = dbFile.FileNumber,
             ClientName = dbFile.ClientName,
             Details = dbFile.Details,
-            Status=dbFile.Status,
-            Onorariu=dbFile.Onorariu,
-            Moneda=dbFile.Moneda,
-            OnorariuRestant= dbFile.OnorariuRestant,
-            Delegatie=dbFile.Delegatie,
-            CuvantCheie=dbFile.CuvantCheie,
-            NumarContract=dbFile.NumarContract,
-            DataScadenta=dbFile.DataScadenta,
-            OutCome=dbFile.Outcome,
-           Source=dbFile.Source,
-            TipDosar = dbFile.TipDosar,
-            Instanta=dbFile.Instanta,
-            LawyerName = dbFile.LawyerName,
-            LawyerId = dbFile.LawyerId
-          });
-
-          continue;
-        }
-
-        var mostRecentSoapDosar = soapDosare
-          .OrderByDescending(d => d.data)
-          .FirstOrDefault();
-
-        if (mostRecentSoapDosar != null)
-        {
-          var combinedDto = new AllFilesDto
-          {
-            Id = dbFile.Id,
-            FileNumber = dbFile.FileNumber,
-            ClientName = dbFile.ClientName,
-            Details = dbFile.Details,
-            TipDosar = dbFile.TipDosar,
-            Status= dbFile.Status,
-            Source=dbFile.Source,
-            LawyerName = dbFile.LawyerName,
-            Instanta= dbFile.Instanta,
-            LawyerId = dbFile.LawyerId,
+            Status = dbFile.Status,
             Onorariu = dbFile.Onorariu,
-            Moneda= dbFile.Moneda,
-            CuvantCheie=dbFile.CuvantCheie,
-            OnorariuRestant=dbFile.OnorariuRestant,
+            Moneda = dbFile.Moneda,
+            OnorariuRestant = dbFile.OnorariuRestant,
             Delegatie = dbFile.Delegatie,
+            CuvantCheie = dbFile.CuvantCheie,
             NumarContract = dbFile.NumarContract,
             DataScadenta = dbFile.DataScadenta,
-
-            Numar = mostRecentSoapDosar.numar,
-            NumarVechi = mostRecentSoapDosar.numarVechi,
-            Data = mostRecentSoapDosar.data,
-            Institutie = mostRecentSoapDosar.institutie.ToString(),
-            ObiectDosar = mostRecentSoapDosar.obiect.ToString(),
-            Departament = mostRecentSoapDosar.departament,
-            CategorieCaz = mostRecentSoapDosar.categorieCaz?.ToString(),
-            StadiuProcesual = mostRecentSoapDosar.stadiuProcesual?.ToString(),
-            Parti = mostRecentSoapDosar.parti?.Select(p => new ParteDTO
-            {
-              Nume = p.nume,
-              CalitateParte = p.calitateParte
-            }).ToList(),
-            Sedinte = mostRecentSoapDosar.sedinte?.Select(s => new SedintaDTO
-            {
-              Complet = s.complet,
-              Data = s.data,
-              Ora = s.ora,
-              Solutie = s.solutie,
-              SolutieSumar = s.solutieSumar,
-              DataPronuntare = s.dataPronuntare,
-              DocumentSedinta = s.documentSedinta?.ToString() ?? string.Empty,
-              NumarDocument = s.numarDocument,
-              DataDocument = s.dataDocument
-            }).ToList()
+            OutCome = dbFile.Outcome,
+            Source = dbFile.Source,
+            TipDosar = dbFile.TipDosar,
+            Instanta = dbFile.Instanta,
+            LawyerName = dbFile.LawyerName,
+            LawyerId = dbFile.LawyerId
           };
+        });
 
-          combinedFilesList.Add(combinedDto);
-        }
+        var results = await Task.WhenAll(tasks);
+
+        combinedFilesList.AddRange(results);
       }
 
       _logger.LogInformation("Finished processing all file details.");
       return combinedFilesList;
     }
+
 
 
 

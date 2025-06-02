@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LawProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69ef50999edeec985ec711819dcff7775b1a4b00")]
 [assembly: System.Reflection.AssemblyProductAttribute("LawProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LawProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

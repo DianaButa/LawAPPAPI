@@ -155,44 +155,41 @@ namespace LawProject.Controllers
           dto.Details = "Default details";
         }
 
+        // Salvăm dosarul în baza de date
         await _fileManagementService.AddFileAsync(dto);
+        _logger.LogInformation($"File {dto.FileNumber} saved to database.");
 
-        if (dto.Source == "ICCJ")
+        // Procesăm doar dacă sursa este ICCJ sau JUST
+        switch (dto.Source)
         {
-   
-          _logger.LogInformation($"Processing ICCJ file {dto.FileNumber}");
-          await _fileToCalendarService.ProcessSingleFileIccjAsync(dto.FileNumber);
+          case "ICCJ":
+            _logger.LogInformation($"Processing ICCJ file {dto.FileNumber}");
+            await _fileToCalendarService.ProcessSingleFileIccjAsync(dto.FileNumber);
+            break;
+
+          case "JUST":
+            _logger.LogInformation($"Processing JUST file {dto.FileNumber}");
+            await _fileToCalendarService.ProcessSingleFileAsync(dto.FileNumber);
+            break;
+
+          case "UP":
+            _logger.LogInformation($"Source is UP, no additional processing for file {dto.FileNumber}.");
+            break;
+
+          default:
+            _logger.LogWarning($"Unknown source '{dto.Source}' for file {dto.FileNumber}. No processing performed.");
+            break;
         }
-        else if (dto.Source == "JUST")
+
+        // Trimitem email dacă avem datele necesare
+        if (!string.IsNullOrEmpty(dto.Email) && !string.IsNullOrEmpty(dto.ClientName))
         {
-          
-          _logger.LogInformation($"Processing JUST file {dto.FileNumber}");
-          await _fileToCalendarService.ProcessSingleFileAsync(dto.FileNumber);
+          _logger.LogInformation($"Sending confirmation email to {dto.Email} for file {dto.FileNumber}");
+          await _emailService.SendConfirmationEmail(dto.Email, dto.ClientName, dto.FileNumber);
         }
         else
         {
-         
-          _logger.LogInformation($"No specific source. Saving file {dto.FileNumber} without additional processing.");
-        }
-
-          try
-          {
-          string email = dto.Email;
-          string name = dto.ClientName;
-
-          if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(name))
-          {
-            _logger.LogInformation($"Sending confirmation email to {email} for file {dto.FileNumber}");
-            await _emailService.SendConfirmationEmail(email, name, dto.FileNumber);
-          }
-          else
-          {
-            _logger.LogWarning("Email or client name is missing in the provided data. Email not sent.");
-          }
-        }
-        catch (Exception emailEx)
-        {
-          _logger.LogError($"Error sending confirmation email: {emailEx.Message}");
+          _logger.LogWarning("Email or client name is missing. Email not sent.");
         }
 
         return CreatedAtAction(nameof(GetFiles), new { fileNumber = dto.FileNumber }, dto);
@@ -203,6 +200,7 @@ namespace LawProject.Controllers
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
+
 
 
 
