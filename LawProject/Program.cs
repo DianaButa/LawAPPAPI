@@ -63,7 +63,7 @@ builder.Services.AddHttpClient<IccjService>(client =>
 // Add services to the container.
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ProdConnection")));
 
 
 builder.Services.AddScoped<IClientService, ClientService>();
