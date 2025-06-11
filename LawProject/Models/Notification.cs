@@ -16,6 +16,10 @@ namespace LawProject.Models
     public string Type { get; set; }
 
     public string FileNumber { get; set; } = string.Empty;
+
+    public string ClientName {  get; set; } = string.Empty;
+
+    public string LawyerName {  get; set; } = string.Empty;
     public bool IsRead { get; set; }
     public string Details { get; set; } = string.Empty;
     public int UserId { get; set; }

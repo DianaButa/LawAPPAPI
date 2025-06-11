@@ -25,6 +25,23 @@ namespace LawProject.Service.AccountService
       _context = context;
     }
 
+    public async Task<IEnumerable<UserDto>> GetAllFilesAsync()
+    {
+      var users = await _context.Users
+          .Select(u => new UserDto
+          {
+            Id = u.Id,
+            UserName = u.UserName,
+            Email = u.Email,
+            Role = u.Role,
+        
+          })
+          .ToListAsync();
+
+      return users;
+    }
+
+
     public async Task<AuthenticationResultDto> Register(UserDto userDto)
     {
       var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
@@ -38,7 +55,7 @@ namespace LawProject.Service.AccountService
         UserName = userDto.UserName,
         Email = userDto.Email,
         PasswordHash = hashedPassword,
-        IsValidated = true ,
+        IsValidated = true,
         Role = userDto.Role ?? "User"
 
       };
@@ -167,7 +184,28 @@ namespace LawProject.Service.AccountService
 
       return "Parola a fost resetată cu succes.";
     }
-  }
 
+
+
+    public async Task<string> ChangePassword(ChangePasswordDto dto)
+    {
+      var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+      if (user == null)
+        throw new Exception("Utilizatorul nu a fost găsit.");
+
+      // Verifică parola actuală
+      if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+        throw new Exception("Parola actuală este incorectă.");
+
+      // Setează noua parolă
+      user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+
+      await _context.SaveChangesAsync();
+
+      return "Parola a fost schimbată cu succes.";
+    }
+
+
+  }
 }
 

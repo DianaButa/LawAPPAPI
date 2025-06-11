@@ -24,9 +24,13 @@ namespace LawProject.Service.ReceiptService
         throw new Exception("Factura nu a fost găsită.");
       }
 
-      var numarChitanta = $"CH-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+      int offset = 581; // prima chitanță nouă va fi DAAC-582
+      var count = await _context.Receipts.CountAsync();
+      var nextNumber = offset + count + 1;
 
-     var chitanta = new Receipt
+      var numarChitanta = $"DAAC-{nextNumber}";
+
+      var chitanta = new Receipt
       {
         InvoiceId = factura.Id,
         NumarFactura = factura.NumarFactura,
@@ -34,30 +38,27 @@ namespace LawProject.Service.ReceiptService
         NumarChitanta = numarChitanta,
         DataChitanta = DateTime.Now,
         Suma = dto.Suma,
-        Moneda= dto.Moneda
-     };
+        Moneda = dto.Moneda
+      };
 
       _context.Receipts.Add(chitanta);
       await _context.SaveChangesAsync();
 
-    
-        return new ReceiptResponseDto
-       {
-          NumarChitanta = chitanta.NumarChitanta,
-         DataChitanta = chitanta.DataChitanta,
-          Suma = chitanta.Suma,
-          Moneda=chitanta.Moneda,
-          NumarFactura = factura.NumarFactura,
-          DataFactura = factura.DataEmitere ?? DateTime.MinValue,
-          ClientType = factura.ClientType,
-          ClientId = factura.ClientId,
-          CNP = factura.ClientType == "PF" ? factura.CNP : null,
-          CUI = factura.ClientType == "PJ" ? factura.CUI : null,
-          ClientName = factura.ClientName,
-          AdresaClient = factura.AdresaClient
-        };
-
-    
+      return new ReceiptResponseDto
+      {
+        NumarChitanta = chitanta.NumarChitanta,
+        DataChitanta = chitanta.DataChitanta,
+        Suma = chitanta.Suma,
+        Moneda = chitanta.Moneda,
+        NumarFactura = factura.NumarFactura,
+        DataFactura = factura.DataEmitere ?? DateTime.MinValue,
+        ClientType = factura.ClientType,
+        ClientId = factura.ClientId,
+        CNP = factura.ClientType == "PF" ? factura.CNP : null,
+        CUI = factura.ClientType == "PJ" ? factura.CUI : null,
+        ClientName = factura.ClientName,
+        AdresaClient = factura.AdresaClient
+      };
     }
 
 

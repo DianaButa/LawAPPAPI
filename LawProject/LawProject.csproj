@@ -7,12 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Contract\CONTRACT.docx" />
+    <None Remove="Delegatie\DELEGATIE.docx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Contract\CONTRACT.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Delegatie\DELEGATIE.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.18" />
     <PackageReference Include="itext7" Version="8.0.4" />
     <PackageReference Include="MailKit" Version="4.11.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
@@ -34,6 +49,12 @@
     <PackageReference Include="System.ServiceModel.Http" Version="8.0.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="8.0.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.10.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="web.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

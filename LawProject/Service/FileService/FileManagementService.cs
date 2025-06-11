@@ -84,7 +84,7 @@ namespace LawProject.Service.FileService
       var notification = new Notification
       {
         Title = "Eveniment nou programat",
-        Message = $"Un nou eveniment a fost programat pentru dosarul {scheduledEvent.FileNumber}",
+        Message = $"Un nou eveniment a fost programat pentru dosarul {scheduledEvent.FileNumber}, avocat {scheduledEvent.LawyerName}, client {scheduledEvent.ClientName}",
         Timestamp = DateTime.UtcNow,
         Type = "event_scheduled",
         FileNumber = scheduledEvent.FileNumber,
@@ -232,11 +232,7 @@ namespace LawProject.Service.FileService
               Data = mostRecentSoapDosar.data,
               Institutie = mostRecentSoapDosar.institutie.ToString(),
               ObiectDosar = mostRecentSoapDosar.obiect.ToString(),
-              Parti = mostRecentSoapDosar.parti?.Select(p => new ParteDTO
-              {
-                Nume = p.nume,
-                CalitateParte = p.calitateParte
-              }).ToList(),
+       
               Sedinte = mostRecentSoapDosar.sedinte?.Select(s => new SedintaDTO
               {
                 Complet = s.complet,
@@ -245,9 +241,7 @@ namespace LawProject.Service.FileService
                 Solutie = s.solutie,
                 SolutieSumar = s.solutieSumar,
                 DataPronuntare = s.dataPronuntare,
-                DocumentSedinta = s.documentSedinta?.ToString() ?? string.Empty,
-                NumarDocument = s.numarDocument,
-                DataDocument = s.dataDocument
+ 
               }).ToList()
             };
           }
@@ -359,6 +353,7 @@ namespace LawProject.Service.FileService
           Instanta= dto.Instanta,
           CuloareCalendar = lawyer?.Color ?? "#E0E0E0",
           LawyerId = dto.LawyerId,
+          LawyerName=dto.LawyerName,
           Status = "deschis",
       
         };
@@ -370,10 +365,11 @@ namespace LawProject.Service.FileService
         var notification = new Notification
         {
           Title = "Fișier nou adăugat",
-          Message = $"Un nou fișier a fost adăugat: {dto.FileNumber}",
+          Message = $"Un nou fișier a fost adăugat: {dto.FileNumber}, pentru avocat {dto.LawyerName}",
           Timestamp = DateTime.UtcNow,
           Type = "new_file",
           FileNumber = dto.FileNumber,
+          LawyerName=dto.LawyerName,
           IsRead = false,
           Source=dto.Source,
           Details = $"Client: {file.ClientName}, Tip dosar: {dto.TipDosar}",
@@ -487,7 +483,8 @@ namespace LawProject.Service.FileService
             OnorariuRestant=d.Onorariu,
             DataScadenta=d.DataScadenta,
             LawyerId = d.Lawyer != null ? d.Lawyer.Id : (int?)null, 
-            LawyerName = d.Lawyer != null ? d.Lawyer.LawyerName : string.Empty
+            LawyerName = d.Lawyer != null ? d.Lawyer.LawyerName : string.Empty,
+            LawyerEmail=d.Lawyer != null ? d.Lawyer.Email: string.Empty,
           })
           .FirstOrDefaultAsync();
     }
@@ -582,6 +579,7 @@ namespace LawProject.Service.FileService
       // Update file details
       existingFile.FileNumber = dto.FileNumber;
       existingFile.Details = dto.Details ?? existingFile.Details;
+      existingFile.CuvantCheie = dto.CuvantCheie ?? existingFile.CuvantCheie;
       existingFile.TipDosar = dto.TipDosar;
       existingFile.CuloareCalendar = dto.TipDosar switch
       {

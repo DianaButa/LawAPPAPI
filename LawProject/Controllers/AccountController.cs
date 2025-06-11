@@ -1,5 +1,6 @@
 using LawProject.DTO;
 using LawProject.Service.AccountService;
+using LawProject.Service.FileService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +25,21 @@ namespace LawProject.Controllers
     public async Task<UserDto> DeleteUser(string email)
     {
       return await _accountService.DeleteUser(email);
+    }
+
+
+    [HttpGet("Users")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+      try
+      {
+        var allusers = await _accountService.GetAllFilesAsync();
+        return Ok(allusers);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
     }
 
 
@@ -52,6 +68,21 @@ namespace LawProject.Controllers
     {
       return Ok(await _accountService.ResetPassword(resetPassword));
     }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+      try
+      {
+        var result = await _accountService.ChangePassword(dto);
+        return Ok(new { message = result });
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(new { error = ex.Message });
+      }
+    }
+
 
   }
 }

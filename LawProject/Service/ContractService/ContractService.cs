@@ -10,10 +10,12 @@ namespace LawProject.Service.ContractService
   public class ContractService : IContractService
   {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IWebHostEnvironment _env;
 
-    public ContractService(ApplicationDbContext dbContext)
+    public ContractService(ApplicationDbContext dbContext, IWebHostEnvironment env)
     {
       _dbContext = dbContext;
+      _env = env;
     }
 
     public async Task<byte[]> GenerateDocumentsAsync(GenerateContractDto dto)
@@ -51,10 +53,10 @@ namespace LawProject.Service.ContractService
       }
 
       // 2. Încarcă șablonul de contract
-      string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-      string templateFilePath = Path.Combine(baseDirectory, "Contract/CONTRACT.docx");
+      // Calea relativă la root-ul proiectului (folderul unde e fișierul .csproj)
+      string webRootPath = _env.ContentRootPath; // root-ul proiectului pe Azure
+      string templateFilePath = Path.Combine(webRootPath, "Contract", "CONTRACT.docx");
 
-      // Verifică dacă șablonul există
       if (!File.Exists(templateFilePath))
       {
         throw new FileNotFoundException($"Șablonul de contract nu a fost găsit la calea {templateFilePath}");
@@ -62,7 +64,7 @@ namespace LawProject.Service.ContractService
 
       // 3. Copiază șablonul într-un nou fișier pentru modificare
       string newFileName = $"Contract_{clientName}.docx";
-      string newFilePath = Path.Combine(baseDirectory, "Contract", newFileName);
+      string newFilePath = Path.Combine(webRootPath, "Contract", newFileName);
       File.Copy(templateFilePath, newFilePath, true);
 
       // 4. Înlocuiește placeholderii din document cu datele clientului

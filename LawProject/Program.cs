@@ -1,12 +1,14 @@
 
 
 
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Hangfire;
 using Hangfire.SqlServer;
 using LawProject.Configurations;
 using LawProject.Database;
 using LawProject.Service;
 using LawProject.Service.AccountService;
+using LawProject.Service.CheltuieliService;
 using LawProject.Service.ClientService;
 using LawProject.Service.ContractService;
 using LawProject.Service.DailyEventService;
@@ -31,6 +33,8 @@ using System.Security.Cryptography;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["ApplicationInsights:ConnectionString"]);
+
 
 
 // Configurarea Hangfire
@@ -39,7 +43,7 @@ builder.Services.AddHangfire(config =>
   config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
-        .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+        .UseSqlServerStorage(builder.Configuration.GetConnectionString("ProdConnection"), new SqlServerStorageOptions
         {
           CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
           SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
@@ -74,6 +78,7 @@ builder.Services.AddScoped<IRaportService, RaportService>();
 builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<IDelegatieService, DelegatieService>();
 builder.Services.AddScoped<IDailyEventService,DailyEventService>();
+builder.Services.AddScoped<ICheltuieliService, CheltuieliService>();
 builder.Services.AddScoped<IFileManagementService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<FileToCalendarService>();
@@ -83,6 +88,8 @@ builder.Services.AddScoped<ILawyerService, LawyerService>();
 builder.Services.AddScoped<IPOSService, POSService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddMemoryCache();
+
 
 builder.Services.AddScoped<MyQueryService>();
 builder.Services.AddScoped<QuerySoapClient>(provider =>
@@ -96,7 +103,7 @@ builder.Services.AddScoped<QuerySoapClient>(provider =>
 
 builder.Services.AddSignalR();
 builder.Services.AddLogging();
-builder.Services.ConfigureCors();
+builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.AddControllers();
 
 
@@ -126,13 +133,14 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
   app.UseSwagger();
   app.UseSwaggerUI();
-}
+//}s
 
-app.UseCors("AllowAllOrigins");
+app.UseCors("MyAllowSpecificOrigins");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 

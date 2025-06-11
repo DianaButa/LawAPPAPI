@@ -2,12 +2,15 @@ using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Models;
 using LawProject.Service.Lawyer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,User,Secretariat")]
+
   [Route("api/[controller]")]
   [ApiController]
   public class LawyerController : ControllerBase

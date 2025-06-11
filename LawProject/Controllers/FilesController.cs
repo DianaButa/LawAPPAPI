@@ -5,12 +5,15 @@ using LawProject.Service;
 using LawProject.Service.EmailService;
 using LawProject.Service.FileService;
 using LawProject.Service.ICCJ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
+ [Authorize(Roles = "Manager,User,Secretariat")]
+
   [Route("api/[controller]")]
   [ApiController]
   public class FilesController : ControllerBase
@@ -51,9 +54,10 @@ namespace LawProject.Controllers
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
-
-    [HttpGet("{fileNumber}")]
-    public async Task<IActionResult> GetFileByNumberWithSource(string fileNumber, [FromQuery] string source)
+    [HttpGet("search")]
+    public async Task<IActionResult> GetFileByNumberWithSource(
+        [FromQuery] string fileNumber,
+        [FromQuery] string source)
     {
       try
       {
@@ -182,9 +186,9 @@ namespace LawProject.Controllers
         }
 
         // Trimitem email dacă avem datele necesare
-        if (!string.IsNullOrEmpty(dto.Email) && !string.IsNullOrEmpty(dto.ClientName))
+        if (!string.IsNullOrEmpty(dto.LawyerEmail) && !string.IsNullOrEmpty(dto.ClientName))
         {
-          _logger.LogInformation($"Sending confirmation email to {dto.Email} for file {dto.FileNumber}");
+          _logger.LogInformation($"Sending confirmation email to {dto.LawyerEmail} for file {dto.FileNumber}");
           await _emailService.SendConfirmationEmail(dto.Email, dto.ClientName, dto.FileNumber);
         }
         else

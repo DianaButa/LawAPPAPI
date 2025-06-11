@@ -52,7 +52,8 @@ namespace LawProject.Models
 
     public string CuloareCalendar { get; set; }
 
-    public int? LawyerId { get; set; }  // LawyerId este nullable
+    public int? LawyerId { get; set; }
+    public string? LawyerName {  get; set; } 
 
     [ForeignKey("LawyerId")]
     public virtual Lawyer Lawyer { get; set; }

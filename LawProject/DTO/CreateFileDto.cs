@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 namespace LawProject.DTO
 {
@@ -38,5 +39,7 @@ namespace LawProject.DTO
 
     public int? LawyerId { get; set; }
     public string LawyerName { get; set; } = string.Empty;
+
+    public string LawyerEmail {  get; set; } = string.Empty;
   }
 }

@@ -31,10 +31,10 @@ namespace LawProject.Service.ClientService
       _logger = logger;
     }
 
-    public async Task<IEnumerable<DailyEventDto>> GetAllPFAsync()
+    public async Task<IEnumerable<ClientPFDto>> GetAllPFAsync()
     {
       var clients = await _context.ClientPFs.ToListAsync();  
-      return clients.Select(client => new DailyEventDto
+      return clients.Select(client => new ClientPFDto
       {
         Id = client.Id,
         FirstName = client.FirstName,
@@ -61,7 +61,7 @@ namespace LawProject.Service.ClientService
     }
 
     // Adăugare client persoană fizică
-    public async Task AddClientPF(DailyEventDto clientDto)
+    public async Task AddClientPF(ClientPFDto clientDto)
     {
       var newClient = new ClientPF
       {
@@ -180,7 +180,7 @@ namespace LawProject.Service.ClientService
       await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateClientPF(int clientId, DailyEventDto clientDto)
+    public async Task UpdateClientPF(int clientId, ClientPFDto clientDto)
     {
       var client = await _context.ClientPFs.FindAsync(clientId);
       if (client == null) throw new Exception("Clientul nu a fost găsit.");
@@ -192,8 +192,10 @@ namespace LawProject.Service.ClientService
       client.Address = clientDto.Address;
       client.PhoneNumber = clientDto.PhoneNumber;
 
-      await _context.SaveChangesAsync();
+      var changed = await _context.SaveChangesAsync();
+      _logger.LogInformation($"Client PF cu id={clientId} actualizat. Entități modificate: {changed}");
     }
+
 
     public async Task DeleteClientPF(int clientId)
     {

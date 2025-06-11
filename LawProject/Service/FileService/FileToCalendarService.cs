@@ -6,6 +6,7 @@ using LawProject.Service.ICCJ;
 using LawProject.Service.Notifications;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace LawProject.Service.FileService
 {
   public class FileToCalendarService
@@ -181,6 +182,7 @@ namespace LawProject.Service.FileService
               ClientId = dosarDb.ClientId,
               ClientType = dosarDb.ClientType,
               Source = dosarDb.Source,
+              LawyerName=dosarDb.LawyerName,
               TipDosar = dosarDb.TipDosar.ToLower(),
               ClientName = dosarDb.ClientName,
               Description = description,
@@ -278,6 +280,8 @@ namespace LawProject.Service.FileService
 
         string color = "#E0E0E0";
 
+
+
         if (dosarDb.LawyerId != null)
         {
           int lawyerId = dosarDb.LawyerId;  // Presupunem că LawyerId este un int
@@ -357,6 +361,7 @@ namespace LawProject.Service.FileService
               Source=dosarDb.Source,
               ClientName = dosarDb.ClientName,
               ClientId= dosarDb.ClientId,
+              LawyerName=dosarDb.LawyerName,
               ClientType= dosarDb.ClientType,
               Description = $"Complet: Ora: {ora}, {sedinta.complet},  Instituție: {dosar.institutie}",
               Color = color
@@ -374,22 +379,44 @@ namespace LawProject.Service.FileService
         if (hasChanges)
         {
           string subject = $"Modificări detectate pentru dosarul {dosar.numar}";
-          string message = string.Join("<br>", changes);
+          string message = $"Client: {dosarDb.ClientName}<br>Avocat: {dosarDb.LawyerName}<br><br>" +
+                      string.Join("<br>", changes);
+
+          // Obținem emailul avocatului din dosarDb
+          var email = dosarDb.LawyerEmail;
+
+          string name = "Doseanu-Law";
+
+          if (dosarDb.LawyerId != null)
+          {
+            int lawyerId = Convert.ToInt32(dosarDb.LawyerId); 
+            var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == lawyerId);
+            if (lawyer != null && !string.IsNullOrWhiteSpace(lawyer.Email))
+            {
+              email = lawyer.Email;
+              name = lawyer.LawyerName;
+            }
+          }
+
+
+          _logger.LogInformation($"Sending email to {dosarDb.LawyerEmail} for case {dosar.numar}");
+
+
 
           // Trimitere notificare email
-          var email = "diana.c.farcas@gmail.com";  // Adresa poate fi preluată din baza de date a dosarului dacă este necesar
-          var name = "Cases App";  // Poți adăuga numele utilizatorului sau alt detaliu specific
           await _emailService.SendNotificatonEmail(email, name, dosar.numar.ToString());
-          _logger.LogInformation($"Notification email sent for case {dosar.numar}");
+          _logger.LogInformation($"Notification email sent for case {dosar.numar} to {email}");
+
 
           // Create in-app notification
           var notification = new Notification
           {
             Title = $"Modificări pentru dosarul {dosar.numar}",
-            Message = $"S-au detectat modificări pentru dosarul {dosar.numar}",
+            Message = $"S-au detectat modificări pentru dosarul {dosar.numar} ,avocat {dosarDb.LawyerName}, client {dosarDb.ClientName}",
             Timestamp = DateTime.UtcNow,
             Type = "hearing_changes",
             FileNumber = dosar.numar,
+            LawyerName= dosarDb.LawyerName,
             Source=dosarDb.Source,
             IsRead = false,
             Details = string.Join("\n", changes),

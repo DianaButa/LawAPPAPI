@@ -1,13 +1,17 @@
 using LawProject.DTO;
 using LawProject.Service.POSService;
 using LawProject.Service.ReceiptService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,Secretariat")]
+
   [Route("api/[controller]")]
   [ApiController]
+
   public class POSController : ControllerBase
   {
     private readonly IPOSService _posService;

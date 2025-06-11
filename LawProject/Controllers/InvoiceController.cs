@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,Secretariat")]
+
   [Route("api/[controller]")]
   [ApiController]
   [Authorize(Roles = "Secretariat,Manager")]

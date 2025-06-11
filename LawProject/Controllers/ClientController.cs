@@ -2,12 +2,14 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using LawProject.Database;
 using LawProject.DTO;
 using LawProject.Service.ClientService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,User,Secretariat")]
   [Route("api/[controller]")]
   [ApiController]
   public class ClientController : ControllerBase
@@ -25,7 +27,7 @@ namespace LawProject.Controllers
 
     // Obține persoanele fizice
     [HttpGet("persoane-fizice")]
-    public async Task<ActionResult<IEnumerable<DailyEventDto>>> GetClientPF()
+    public async Task<ActionResult<IEnumerable<ClientPFDto>>> GetClientPF()
     {
       var clients = await _clientService.GetAllPFAsync();
       if (clients == null || !clients.Any())
@@ -49,7 +51,7 @@ namespace LawProject.Controllers
 
     // Adăugare client persoană fizică
     [HttpPost("persoane-fizice")]
-    public async Task<IActionResult> AddClientPF(DailyEventDto clientDto)
+    public async Task<IActionResult> AddClientPF(ClientPFDto clientDto)
     {
       try
       {
@@ -171,12 +173,24 @@ namespace LawProject.Controllers
 
         if (clientType == "pf")
         {
-          var pfDto = clientDto.Deserialize<DailyEventDto>();
+          var pfDto = clientDto.Deserialize<ClientPFDto>(new JsonSerializerOptions
+          {
+            PropertyNameCaseInsensitive = true
+          });
+          if (pfDto == null)
+            return BadRequest("DTO invalid.");
+
           await _clientService.UpdateClientPF(clientId, pfDto);
         }
         else
         {
-          var pjDto = clientDto.Deserialize<ClientPJDto>();
+          var pjDto = clientDto.Deserialize<ClientPJDto>(new JsonSerializerOptions
+          {
+            PropertyNameCaseInsensitive = true
+          });
+          if (pjDto == null)
+            return BadRequest("DTO invalid.");
+
           await _clientService.UpdateClientPJ(clientId, pjDto);
         }
 
@@ -188,12 +202,13 @@ namespace LawProject.Controllers
         return StatusCode(500, "Eroare la actualizarea clientului.");
       }
     }
-  
 
 
 
-  // Ștergere client (PF sau PJ)
-  [HttpDelete]
+
+
+    // Ștergere client (PF sau PJ)
+    [HttpDelete]
     public async Task<IActionResult> DeleteClient([FromQuery] int clientId, [FromQuery] string clientType)
     {
       try

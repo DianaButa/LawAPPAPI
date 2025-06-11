@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "apis1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/LawProjectapi/apis/LawProject",
+      "type": "apis.azure"
+    },
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/doseanu/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsDefaultConnection_0F83CC5A22",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/doseanuserver/databases/LawProjectAPIBUN",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:DefaultConnection"
+    }
+  }
+}

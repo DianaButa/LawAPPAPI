@@ -130,15 +130,16 @@ namespace LawProject.Service.InvoiceSerices
 
     private string GenerateInvoiceNumber()
     {
+      int offset = 1475;
       // Obținem anul curent
       var year = DateTime.Now.Year.ToString();
 
       // Numărăm facturile deja emise în anul curent
-      var invoiceCount = _dbContext.Invoices
-          .Count(i => i.DataEmitere.HasValue && i.DataEmitere.Value.Year == DateTime.Now.Year) + 1;
+      var invoiceCount = _dbContext.Invoices.Count();
 
-      // Generăm numărul facturii în formatul: INV-YYYY-XXXX (unde YYYY este anul, iar XXXX este numărul facturii)
-      return $"DAAF-{invoiceCount:D4}";
+      var nextInvoiceNumber = offset + invoiceCount + 1;
+
+      return $"DAAF-{year}-{nextInvoiceNumber:D4}";
     }
 
 

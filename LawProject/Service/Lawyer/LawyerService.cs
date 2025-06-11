@@ -14,17 +14,20 @@ namespace LawProject.Service.Lawyer
     private readonly ApplicationDbContext _context;
     private readonly IFileManagementService _fileService;
     private readonly ITaskService _taskService;
+    private readonly IServiceScopeFactory _scopeFactory;
+
     private readonly IRaportService _raportService;
     private readonly IDailyEventService _dailyEventService;
 
     public LawyerService(ApplicationDbContext context, IFileManagementService fileService,
-        ITaskService taskService, IRaportService raportService, IDailyEventService dailyEventService )
+        ITaskService taskService, IRaportService raportService, IDailyEventService dailyEventService, IServiceScopeFactory scopeFactory )
     {
       _context = context;
       _fileService = fileService;
       _taskService = taskService;
       _raportService = raportService;
       _dailyEventService = dailyEventService;
+      _scopeFactory = scopeFactory;
     }
 
     public async Task<IEnumerable<LawyerDto>> GetAllLawyersAsync()
@@ -34,7 +37,9 @@ namespace LawProject.Service.Lawyer
           {
             Id = l.Id,
             LawyerName = l.LawyerName,
-            Color = l.Color 
+            Color = l.Color ,
+            Email= l.Email ,
+            UserId = l.UserId
           })
           .ToListAsync();
 
@@ -53,7 +58,8 @@ namespace LawProject.Service.Lawyer
       var lawyer = new Models.Lawyer
       {
         LawyerName = lawyerDto.LawyerName,
-        Color = lawyerDto.Color
+        Color = lawyerDto.Color,
+        UserId = lawyerDto.UserId
       };
 
       _context.Lawyers.Add(lawyer);
@@ -94,31 +100,57 @@ namespace LawProject.Service.Lawyer
     public async Task<List<LawyerOverviewDto>> GetAllLawyerOverviewsAsync()
     {
       var lawyers = await _context.Lawyers.ToListAsync();
-
       var lawyerOverviews = new List<LawyerOverviewDto>();
+
+      var semaphore = new SemaphoreSlim(5);
+      var tasks = new List<Task>();
 
       foreach (var lawyer in lawyers)
       {
-        var openFiles = await _fileService.GetOpenFilesByLawyerIdAsync(lawyer.Id);
-        var closedFiles = await _fileService.GetClosedFilesByLawyerIdAsync(lawyer.Id);
-        var openTasks = await _taskService.GetTasksByLawyerIdAndOpenStatusAsync(lawyer.Id);
-        var closedTasks = await _taskService.GetTasksByLawyerIdAndClosedStatusAsync(lawyer.Id);
+        await semaphore.WaitAsync();
 
-        lawyerOverviews.Add(new LawyerOverviewDto
+        var task = Task.Run(async () =>
         {
-          LawyerId = lawyer.Id,
-          LawyerName = lawyer.LawyerName,
-          LawyerColor=lawyer.Color,
-          OpenFilesCount = openFiles.Count,
-          ClosedFilesCount = closedFiles.Count,
-          OpenTasksCount = openTasks.Count,
-          ClosedTasksCount = closedTasks.Count,
-          OpenFiles = openFiles,
-          ClosedFiles = closedFiles,
-          OpenTasks = openTasks,
-          ClosedTasks = closedTasks
+          try
+          {
+            using var scope = _scopeFactory.CreateScope();
+
+            var fileService = scope.ServiceProvider.GetRequiredService<IFileManagementService>();
+            var taskService = scope.ServiceProvider.GetRequiredService<ITaskService>();
+
+            var openFiles = await fileService.GetOpenFilesByLawyerIdAsync(lawyer.Id);
+            var closedFiles = await fileService.GetClosedFilesByLawyerIdAsync(lawyer.Id);
+            var openTasks = await taskService.GetTasksByLawyerIdAndOpenStatusAsync(lawyer.Id);
+            var closedTasks = await taskService.GetTasksByLawyerIdAndClosedStatusAsync(lawyer.Id);
+
+            lock (lawyerOverviews)
+            {
+              lawyerOverviews.Add(new LawyerOverviewDto
+              {
+                LawyerId = lawyer.Id,
+                LawyerName = lawyer.LawyerName,
+                LawyerColor = lawyer.Color,
+                OpenFilesCount = openFiles.Count,
+                ClosedFilesCount = closedFiles.Count,
+                OpenTasksCount = openTasks.Count,
+                ClosedTasksCount = closedTasks.Count,
+                OpenFiles = openFiles,
+                ClosedFiles = closedFiles,
+                OpenTasks = openTasks,
+                ClosedTasks = closedTasks
+              });
+            }
+          }
+          finally
+          {
+            semaphore.Release();
+          }
         });
+
+        tasks.Add(task);
       }
+
+      await Task.WhenAll(tasks);
 
       return lawyerOverviews;
     }

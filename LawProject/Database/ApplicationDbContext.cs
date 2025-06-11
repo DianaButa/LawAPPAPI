@@ -13,6 +13,7 @@ namespace LawProject.Database
 
 
     public DbSet<Raport> Rapoarte { get; set; }
+    public DbSet<Cheltuieli> Cheltuieli { get; set; }
     public DbSet<Contract> Contracts { get; set; }
 
     public DbSet<DailyEvents> DailyEvents { get; set; }

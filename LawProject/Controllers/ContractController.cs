@@ -1,10 +1,12 @@
 using LawProject.DTO;
 using LawProject.Service.ContractService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,User,Secretariat")]
   [Route("api/[controller]")]
   [ApiController]
   public class ContractController : ControllerBase

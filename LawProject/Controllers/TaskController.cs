@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LawProject.Controllers
 {
+  [Authorize(Roles = "Manager,User,Secretariat")]
+
   [Route("api/[controller]")]
 
   [ApiController]

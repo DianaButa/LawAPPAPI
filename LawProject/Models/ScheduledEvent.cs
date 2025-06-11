@@ -18,7 +18,9 @@ namespace LawProject.Models
     public int? ClientId { get; set; }
 
     public string? ClientType { get; set; }
-    public string Color { get; set; } 
+    public string Color { get; set; }
+
+    public string? LawyerName { get; set; }
     public bool IsReported { get; set; }
 
     public string EventType { get; set; } = "S";

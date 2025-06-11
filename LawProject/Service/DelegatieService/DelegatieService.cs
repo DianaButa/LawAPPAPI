@@ -9,10 +9,13 @@ namespace LawProject.Service.DelegatieService
   public class DelegatieService : IDelegatieService
   {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IWebHostEnvironment _env;
 
-    public DelegatieService(ApplicationDbContext dbContext)
+
+    public DelegatieService(ApplicationDbContext dbContext, IWebHostEnvironment env)
     {
       _dbContext = dbContext;
+      _env = env;
     }
 
     public async Task<byte[]> GenerateDocumentAsync(DelegatieDto dto)
@@ -49,8 +52,8 @@ namespace LawProject.Service.DelegatieService
       string numarDelegatie = file.Delegatie;
 
       // 3. Încarcă șablonul de delegație
-      string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-      string templateFilePath = Path.Combine(baseDirectory, "Delegatie/DELEGATIE.docx");
+      string webRootPath = _env.ContentRootPath;
+      string templateFilePath = Path.Combine(webRootPath, "Delegatie", "DELEGATIE.docx");
 
       if (!File.Exists(templateFilePath))
       {
@@ -59,7 +62,7 @@ namespace LawProject.Service.DelegatieService
 
       // 4. Copiază șablonul pentru modificare
       string newFileName = $"Delegatie_{clientName}.docx";
-      string newFilePath = Path.Combine(baseDirectory, "Delegatie", newFileName);
+      string newFilePath = Path.Combine(webRootPath, "Delegatie", newFileName);
       File.Copy(templateFilePath, newFilePath, true);
 
       // 5. Înlocuiește placeholderii din document cu datele delegației
