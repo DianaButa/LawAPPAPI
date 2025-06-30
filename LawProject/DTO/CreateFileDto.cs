@@ -17,6 +17,8 @@ namespace LawProject.DTO
     public string? Source { get; set; }
 
     public string? Details { get; set; } = string.Empty;
+
+    public string? Parola { get; set; }=string.Empty;
     public string Moneda { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

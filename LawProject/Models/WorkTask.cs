@@ -9,6 +9,8 @@ namespace LawProject.Models
 
     public string LawyerName { get; set; } = string.Empty;
 
+    public Lawyer Lawyer { get; set; }
+
     // Datele de început și de sfârșit (termen limită)
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
@@ -17,6 +19,8 @@ namespace LawProject.Models
     public string Status { get; set; }
 
     // Date despre client (PF sau PJ)
+
+
     public int ClientId { get; set; }
     public string ClientName { get; set; } = string.Empty;
     public string ClientType { get; set; }

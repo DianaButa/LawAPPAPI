@@ -114,27 +114,20 @@ namespace LawProject.Service.TaskService
 
     public async Task<IEnumerable<WorkTask>> GetAllTasksAsync()
     {
-      var tasks = await _context.Tasks.ToListAsync();
-      foreach (var workTask in tasks)
-      {
-        // Adăugăm numele avocatului
-        var lawyer = await _context.Lawyers.FirstOrDefaultAsync(l => l.Id == workTask.LawyerId);
-        workTask.LawyerName = lawyer?.LawyerName ?? string.Empty;
+      var lawyers = await _context.Lawyers
+          .Select(l => new { l.Id, l.LawyerName })
+          .ToDictionaryAsync(l => l.Id);
 
-        // Adăugăm numele clientului
-        if (workTask.ClientType.ToUpper() == "PF")
-        {
-          var clientPF = await _context.ClientPFs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
-          workTask.ClientName = clientPF?.FirstName + " " + clientPF?.LastName;
-        }
-        else if (workTask.ClientType.ToUpper() == "PJ")
-        {
-          var clientPJ = await _context.ClientPJs.FirstOrDefaultAsync(c => c.Id == workTask.ClientId);
-          workTask.ClientName = clientPJ?.CompanyName;
-        }
+      var tasks = await _context.Tasks.ToListAsync();
+
+      foreach (var task in tasks)
+      {
+        task.LawyerName = lawyers.TryGetValue(task.LawyerId, out var lawyer) ? lawyer.LawyerName : string.Empty;
       }
+
       return tasks;
     }
+
 
     public async Task<IEnumerable<WorkTask>> GetTaskByClient(int clientId, string clientType)
     {

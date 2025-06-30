@@ -9,6 +9,9 @@ namespace LawProject.DTO
     public int Id { get; set; }
     public string FileNumber { get; set; } = string.Empty;
     public string ClientName { get; set; } = string.Empty;
+
+    public int ClientId { get; set; }
+    public string ClientType { get; set; }
     public string Details { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string TipDosar { get; set; } = string.Empty;
@@ -18,6 +21,7 @@ namespace LawProject.DTO
     public string Onorariu { get; set; } = string.Empty;
 
     public string? Source { get; set; } = string.Empty;
+    public string? Parola { get; set; } = string.Empty;
     public string CuvantCheie { get; set; } = string.Empty;
 
     public string OutCome { get; set; } = string.Empty;

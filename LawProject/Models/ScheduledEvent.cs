@@ -25,6 +25,11 @@ namespace LawProject.Models
 
     public string EventType { get; set; } = "S";
 
+    public string? Solutie { get; set; }
+    public string? SolutieSumar { get; set; }
+    public bool NotifiedForSolution { get; set; } = false;
+
+
 
   }
 }

@@ -134,10 +134,10 @@ namespace LawProject.Service.Lawyer
                 ClosedFilesCount = closedFiles.Count,
                 OpenTasksCount = openTasks.Count,
                 ClosedTasksCount = closedTasks.Count,
-                OpenFiles = openFiles,
-                ClosedFiles = closedFiles,
-                OpenTasks = openTasks,
-                ClosedTasks = closedTasks
+                //OpenFiles = openFiles,
+                //ClosedFiles = closedFiles,
+                //OpenTasks = openTasks,
+                //ClosedTasks = closedTasks
               });
             }
           }
@@ -165,22 +165,27 @@ namespace LawProject.Service.Lawyer
 
       if (startDate.HasValue && endDate.HasValue)
       {
+        var start = startDate.Value.Date;
+        var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+
         dailyEvents = dailyEvents
-          .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
-          .ToList();
+            .Where(e => e.Date >= start && e.Date <= end)
+            .ToList();
 
         openTasks = openTasks
-          .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
-          .ToList();
+            .Where(t => t.StartDate >= start && t.StartDate <= end)
+            .ToList();
 
         closedTasks = closedTasks
-          .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
-          .ToList();
+            .Where(t => t.StartDate >= start && t.StartDate <= end)
+            .ToList();
 
         rapoarte = rapoarte
-          .Where(r => r.DataRaport >= startDate.Value && r.DataRaport <= endDate.Value)
-          .ToList();
-      }
+            .Where(r => r.DataRaport >= start && r.DataRaport <= end)
+            .ToList();
+      
+    }
+
 
       return new LawyerDashboardDto
       {
@@ -192,6 +197,7 @@ namespace LawProject.Service.Lawyer
         Raport = rapoarte
       };
     }
+
 
 
 

@@ -36,7 +36,7 @@ namespace LawProject.Service.RaportService
       {
         LawyerId = dto.LawyerId,
         LawyerName = lawyer.LawyerName,
-        DataRaport = dto.DataRaport,
+        DataRaport = dto.DataRaport.Date,
         OreDeplasare = dto.OreDeplasare,
         OreInstanta = dto.OreInstanta,
         OreAudieri = dto.OreAudieri,
@@ -263,6 +263,7 @@ namespace LawProject.Service.RaportService
      {
        FileId = s.FileId,
        FileNumber = s.FileNumber,
+       ClientName=s.ClientName,
        OreStudiu = s.OreStudiu
      }).ToList() ?? new List<RaportStudiuDosarDto>()
    });

@@ -95,21 +95,24 @@ namespace LawProject.Service.ClientService
 
     public async Task<FisaClientDetaliataDto> GetFisaClientDetaliataAsync(int clientId, string clientType, string clientName, DateTime? startDate, DateTime? endDate)
     {
-      var files = await _fileManagementService.GetFilesForClientAsync(clientId);
+      var files = await _fileManagementService.GetFilesForClientAsync(clientId, clientType);
       var dailyEvents = await _dailyEventService.GetEventsByClient(clientName);
       var closedTasks = await _taskService.GetClosedTasksByClient(clientId, clientType);
 
-      // 🔎 Aplică filtrarea pe baza intervalului primit
       if (startDate.HasValue && endDate.HasValue)
       {
+        var start = startDate.Value.Date;
+        var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+
         dailyEvents = dailyEvents
-            .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
+            .Where(e => e.Date >= start && e.Date <= end)
             .ToList();
 
         closedTasks = closedTasks
-            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
+            .Where(t => t.StartDate >= start && t.StartDate <= end)
             .ToList();
       }
+
 
       return new FisaClientDetaliataDto
       {
@@ -135,24 +138,27 @@ namespace LawProject.Service.ClientService
 
       var rapoarte = raport != null ? new List<Raport> { raport } : new List<Raport>();
 
-      if (startDate.HasValue && endDate.HasValue)
+     if (startDate.HasValue && endDate.HasValue)
       {
-        events = events
-            .Where(e => e.Date >= startDate.Value && e.Date <= endDate.Value)
-            .ToList();
+         var start = startDate.Value.Date;
+          var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
 
-        closedTasks = closedTasks
-            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
-            .ToList();
+        events = events
+        .Where(e => e.Date >= start && e.Date <= end)
+        .ToList();
+
+       closedTasks = closedTasks
+        .Where(t => t.StartDate >= start && t.StartDate <= end)
+        .ToList();
 
         openedTasks = openedTasks
-            .Where(t => t.StartDate >= startDate.Value && t.StartDate <= endDate.Value)
-            .ToList();
+        .Where(t => t.StartDate >= start && t.StartDate <= end)
+        .ToList();
 
         rapoarte = rapoarte
-            .Where(r => r.DataRaport >= startDate.Value && r.DataRaport <= endDate.Value)
-            .ToList();
-      }
+        .Where(r => r.DataRaport >= start && r.DataRaport <= end)
+        .ToList();
+}
 
       return new FullFileDataDto
       {

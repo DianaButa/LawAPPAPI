@@ -281,15 +281,13 @@ namespace LawProject.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClientId")
+                    b.Property<int?>("ClientId")
                         .HasColumnType("int");
 
                     b.Property<string>("ClientType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Color")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
@@ -307,7 +305,6 @@ namespace LawProject.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FileNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsReported")
@@ -334,15 +331,13 @@ namespace LawProject.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClientId")
+                    b.Property<int?>("ClientId")
                         .HasColumnType("int");
 
                     b.Property<string>("ClientType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Color")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
@@ -360,7 +355,6 @@ namespace LawProject.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FileNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsReported")
@@ -573,6 +567,9 @@ namespace LawProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Parola")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Source")
                         .HasColumnType("nvarchar(max)");
 
@@ -636,6 +633,9 @@ namespace LawProject.Migrations
                     b.Property<string>("FileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HearingDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -902,6 +902,15 @@ namespace LawProject.Migrations
                     b.Property<string>("LawyerName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("NotifiedForSolution")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Solutie")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SolutieSumar")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1019,6 +1028,8 @@ namespace LawProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LawyerId");
 
                     b.ToTable("Tasks");
                 });
@@ -1232,6 +1243,17 @@ namespace LawProject.Migrations
                         .IsRequired();
 
                     b.Navigation("Factura");
+                });
+
+            modelBuilder.Entity("LawProject.Models.WorkTask", b =>
+                {
+                    b.HasOne("LawProject.Models.Lawyer", "Lawyer")
+                        .WithMany()
+                        .HasForeignKey("LawyerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lawyer");
                 });
 
             modelBuilder.Entity("LawProject.Models.ClientPF", b =>

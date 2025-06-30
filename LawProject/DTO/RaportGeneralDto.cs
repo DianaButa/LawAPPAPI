@@ -22,7 +22,7 @@ namespace LawProject.DTO
     public string ClientType { get; set; }
     public int? ClientId { get; set; }
     public int? WorkTaskId { get; set; }
-    public List<RaportTaskDto> TaskuriLucrate { get; set; } = new();
+    public List<RaportTaskDto>? TaskuriLucrate { get; set; } = new();
 
     public List<RaportStudiuDosarDto>? StudiiPeDosar { get; set; } = new();
     public double OreInstanta { get; set; }

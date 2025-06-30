@@ -35,20 +35,31 @@ namespace LawProject.Service.Notifications
           throw new ArgumentException("Notification message is required");
         }
 
-        if (notification.UserId <= 0)
-        {
-          throw new ArgumentException("Valid user ID is required");
-        }
-
         // Set timestamp if not set
         if (notification.Timestamp == default)
         {
           notification.Timestamp = DateTime.UtcNow;
         }
 
+        // 🔍 Verificare duplicate recente
+        bool isDuplicate = await _context.Notifications.AnyAsync(n =>
+            n.FileNumber == notification.FileNumber &&
+            n.Type == notification.Type &&
+            n.Details == notification.Details &&
+            n.Timestamp > DateTime.UtcNow.AddMinutes(-30)
+        );
+
+        if (isDuplicate)
+        {
+          _logger.LogInformation("Skipped duplicate notification for FileNumber: {FileNumber}", notification.FileNumber);
+          return null;
+        }
+
         _context.Notifications.Add(notification);
         await _context.SaveChangesAsync();
         _logger.LogInformation($"Created notification with ID: {notification.Id}");
+
+        await TrimGlobalNotificationsAsync();
         return notification;
       }
       catch (Exception ex)
@@ -275,6 +286,38 @@ namespace LawProject.Service.Notifications
         throw;
       }
     }
+
+    public async Task<bool> NotificationExistsForFileAndDateAsync(string fileNumber, DateTime date)
+    {
+      string dateString = date.ToString("yyyy-MM-dd");
+      return await _context.Notifications.AnyAsync(n =>
+          n.FileNumber == fileNumber &&
+          n.Type == "hearing_changes" &&
+          n.Details.Contains(dateString));
+    }
+
+    public async Task TrimGlobalNotificationsAsync(int maxNotifications = 1000)
+    {
+      // Obține ID-urile celor mai noi maxNotifications notificări (global, indiferent de user)
+      var notificationIdsToKeep = await _context.Notifications
+          .OrderByDescending(n => n.Timestamp)
+          .Take(maxNotifications)
+          .Select(n => n.Id)
+          .ToListAsync();
+
+      // Găsește notificările care nu sunt în lista de păstrat
+      var notificationsToDelete = await _context.Notifications
+          .Where(n => !notificationIdsToKeep.Contains(n.Id))
+          .ToListAsync();
+
+      if (notificationsToDelete.Any())
+      {
+        _context.Notifications.RemoveRange(notificationsToDelete);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation($"Trimmed {notificationsToDelete.Count} old global notifications, keeping latest {maxNotifications}");
+      }
+    }
+
   }
 }
 

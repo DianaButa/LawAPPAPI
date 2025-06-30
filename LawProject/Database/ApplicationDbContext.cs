@@ -104,7 +104,7 @@ namespace LawProject.Database
             .HasMany(r => r.TaskuriLucrate)
             .WithOne(rt => rt.Raport)
             .HasForeignKey(rt => rt.RaportId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
       //modelBuilder.Entity<EventA>()
       //.Property(e => e.ClientType)

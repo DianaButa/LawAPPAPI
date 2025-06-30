@@ -48,6 +48,8 @@ namespace LawProject.Models
 
     public string? Instanta {  get; set; }= string.Empty;
 
+    public string? Parola {  get; set; } = string.Empty; 
+
     public string TipDosar { get; set; } = string.Empty;
 
     public string CuloareCalendar { get; set; }

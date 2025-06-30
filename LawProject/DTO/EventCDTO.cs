@@ -16,12 +16,12 @@ namespace LawProject.DTO
     public string LawyerName { get; set; } = string.Empty;
 
 
-    public int ClientId { get; set; }
+    public int? ClientId { get; set; }
 
     public string? ClientName { get; set; }
 
 
-    public string ClientType { get; set; }
+    public string? ClientType { get; set; }
 
     public int? FileId { get; set; }
     public bool IsReported { get; set; }

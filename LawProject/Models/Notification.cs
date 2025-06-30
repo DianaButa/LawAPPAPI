@@ -25,5 +25,7 @@ namespace LawProject.Models
     public int UserId { get; set; }
 
     public string? Source { get; set; }
+
+    public DateTime? HearingDate { get; set; }
   }
 }

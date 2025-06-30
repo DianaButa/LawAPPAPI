@@ -54,6 +54,26 @@ namespace LawProject.Controllers
         return StatusCode(500, $"Internal server error: {ex.Message}");
       }
     }
+
+    [HttpGet("details")]
+    public async Task<IActionResult> GetFileById(int fileId)
+    {
+      try
+      {
+        var file = await _fileManagementService.GetFileCombinedByIdAsync(fileId);
+        if (file == null)
+          return NotFound("Fișierul nu a fost găsit.");
+
+        return Ok(file);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError($"Eroare la preluarea fișierului {fileId}: {ex.Message}");
+        return StatusCode(500, "Eroare internă la preluarea fișierului.");
+      }
+    }
+
+
     [HttpGet("search")]
     public async Task<IActionResult> GetFileByNumberWithSource(
         [FromQuery] string fileNumber,
@@ -128,7 +148,7 @@ namespace LawProject.Controllers
 
 
     [HttpGet("by-id/{id}")]
-    public async Task<IActionResult> GetFileById(int id)
+    public async Task<IActionResult> GetFilesById(int id)
     {
       try
       {
@@ -372,12 +392,12 @@ namespace LawProject.Controllers
     }
 
     [HttpGet("GetFilesForClient/{clientId}")]
-    public async Task<IActionResult> GetFilesForClient(int clientId)
+    public async Task<IActionResult> GetFilesForClient(int clientId, [FromQuery] string clientType)
     {
       try
       {
         // Se apelează metoda din serviciul de dosare (FileManagementService) care extrage dosarele pentru un client
-        var clientFiles = await _fileManagementService.GetFilesForClientAsync(clientId);
+        var clientFiles = await _fileManagementService.GetFilesForClientAsync(clientId, clientType);
 
         if (clientFiles == null || !clientFiles.Any())
         {

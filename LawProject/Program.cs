@@ -6,6 +6,7 @@ using Hangfire;
 using Hangfire.SqlServer;
 using LawProject.Configurations;
 using LawProject.Database;
+using LawProject.Hubs;
 using LawProject.Service;
 using LawProject.Service.AccountService;
 using LawProject.Service.CheltuieliService;
@@ -69,6 +70,10 @@ builder.Services.AddHttpClient<IccjService>(client =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProdConnection")));
 
+builder.Services.AddControllers().AddJsonOptions(opts =>
+{
+  opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
@@ -101,6 +106,12 @@ builder.Services.AddScoped<QuerySoapClient>(provider =>
   return new QuerySoapClient(binding, endpoint);
 });
 
+builder.Services.AddHealthChecks()
+    // Aici este magia: adaugi o verificare SPECIFICĂ pentru Hangfire
+    .AddHangfire(options => {
+      options.MinimumAvailableServers = 1;
+    });
+
 builder.Services.AddSignalR();
 builder.Services.AddLogging();
 builder.Services.ConfigureCors(builder.Configuration);
@@ -130,6 +141,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddMemoryCache();
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -147,17 +163,30 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 
+app.MapHealthChecks("/health");
 // Folosirea dashboard-ului Hangfire pentru monitorizare la ruta "/hangfire"
 app.UseHangfireDashboard("/hangfire");
 app.UseHangfireServer();
+app.Logger.LogInformation("Hangfire Server started.");
 
-// Adăugăm un job recurent care rulează la fiecare 1 ore pentru a procesa dosarele
 RecurringJob.AddOrUpdate<FileToCalendarService>(
-    "process-all-files-periodically",                
-    service => service.ProcessAllFilesAsync(),     
-    Cron.HourInterval(1));
+    "process-today-files-periodically",                
+    service => service.ProcessDosareFromScheduledEventsTodayAsync(),  
+    Cron.MinuteInterval(30));
+
+RecurringJob.AddOrUpdate<FileToCalendarService>(
+    "process-just-files-periodically",
+    service => service.ProcessJustFilesAsync(),
+    Cron.MinuteInterval(30));
+
+RecurringJob.AddOrUpdate<BackgroundFileCacheUpdater>(
+    "update-soap-cache-periodically",
+    service => service.RefreshCacheJob(),
+    "0 6 * * 6");
+
 app.Run();
 
 

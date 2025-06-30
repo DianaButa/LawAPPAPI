@@ -34,16 +34,28 @@ namespace LawProject.Service.EmailService
       await SendEmailAsync(email, subject, body);
     }
 
-    public async Task SendNotificatonEmail(string email, string name, string fileNumber)
-    {
-      var subject = "Notificare dosar actualizat";
-      var body = $@"
-        <h1>Salut, {name}!</h1>
-        <p>A fost actualizat dosarul cu numarul {fileNumber}. Pentru detalii complete, accesați: 
-        <a href='https://www.doseanu-law.ro/notifications'>Notificări Dosar</a></p>";
+    public async Task SendNotificatonEmail(int id, string email, string name, string fileNumber = null, string subject = null, string body = null)
 
-      await SendEmailAsync(email, subject, body);
+    {
+      string source = "JUST";
+      var notificationLink = $"https://www.doseanu-law.ro/fisa-dosar/{id}";
+
+
+      if (!string.IsNullOrEmpty(subject) && !string.IsNullOrEmpty(body))
+      {
+        await SendEmailAsync(email, subject, body);
+        return;
+      }
+
+      var defaultSubject = "Notificare dosar actualizat";
+      var defaultBody = $@"
+         <h1>Salut, {name}!</h1>
+  <p>A fost actualizat dosarul cu numarul {fileNumber}. Pentru detalii complete, accesați: 
+  <a href='{notificationLink}'>Vezi detalii dosar</a></p>";
+
+      await SendEmailAsync(email, defaultSubject, defaultBody);
     }
+
 
 
 

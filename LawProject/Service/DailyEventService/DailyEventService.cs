@@ -17,6 +17,19 @@ namespace LawProject.Service.DailyEventService
 
     public async Task AddDailyEventAsync(DailyEventsDto Dto)
     {
+
+      var alreadyExists = await _context.DailyEvents.AnyAsync(e =>
+         e.FileNumber == Dto.FileNumber &&
+         e.Date == Dto.Date &&
+         e.LawyerId == Dto.LawyerId &&
+         e.Descriere == Dto.Descriere &&
+         e.ClientName== Dto.ClientName 
+);
+
+      if (alreadyExists)
+      {
+        throw new Exception("Evenimentul există deja și nu poate fi adăugat din nou.");
+      }
       var newDailyEvent = new DailyEvents
       {
         FileNumber = Dto.FileNumber,

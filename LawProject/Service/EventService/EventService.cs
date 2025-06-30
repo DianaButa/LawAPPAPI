@@ -19,7 +19,7 @@ namespace LawProject.Service.EventService
       _logger = logger;
     }
 
-    private async Task<string> GetClientNameAsync(string clientType, int clientId)
+    private async Task<string> GetClientNameAsync(string? clientType, int? clientId)
     {
       return clientType.ToUpper() switch
       {
@@ -240,5 +240,136 @@ namespace LawProject.Service.EventService
 
       return result;
     }
+
+    public async Task<EventADTO?> GetEventAByIdAsync(int eventId)
+    {
+      var entity = await _dbContext.EventsA.FindAsync(eventId);
+      if (entity == null) return null;
+
+      var clientName = await GetClientNameAsync(entity.ClientType, entity.ClientId);
+      var (lawyerName, color) = await GetLawyerInfoAsync(entity.LawyerId);
+
+      return new EventADTO
+      {
+        Id = entity.Id,
+        Date = entity.Date,
+        Time = entity.Time.ToString(@"hh\:mm"),
+        Description = entity.Description,
+        ClientId = entity.ClientId,
+        ClientType = entity.ClientType,
+        ClientName = clientName,
+        FileId = entity.FileId,
+        FileNumber = entity.FileNumber,
+        LawyerId = entity.LawyerId,
+        LawyerName = lawyerName,
+        Color = color
+      };
+    }
+
+    public async Task<EventCDTO?> GetEventCByIdAsync(int eventId)
+    {
+      var entity = await _dbContext.EventsC.FindAsync(eventId);
+      if (entity == null) return null;
+
+      var clientName = await GetClientNameAsync(entity.ClientType, entity.ClientId);
+      var (lawyerName, color) = await GetLawyerInfoAsync(entity.LawyerId);
+
+      return new EventCDTO
+      {
+        Id = entity.Id,
+        Date = entity.Date,
+        Time = entity.Time.ToString(@"hh\:mm"),
+        Description = entity.Description,
+        ClientId = entity.ClientId,
+        ClientType = entity.ClientType,
+        ClientName = clientName,
+        FileId = entity.FileId,
+        FileNumber = entity.FileNumber,
+        IsReported = entity.IsReported,
+        LawyerId = entity.LawyerId,
+        LawyerName = lawyerName,
+        Color = color
+      };
+    }
+
+    public async Task<EventADTO?> UpdateEventAAsync(int eventId, EventADTO dto)
+    {
+      var entity = await _dbContext.EventsA.FindAsync(eventId);
+      if (entity == null) return null;
+
+      if (dto.Date <= DateTime.MinValue)
+        throw new ArgumentException("Invalid date.");
+
+      if (string.IsNullOrWhiteSpace(dto.Time))
+        throw new ArgumentException("Time is required.");
+
+      if (!TimeSpan.TryParseExact(dto.Time, new[] { @"h", @"hh", @"h\:mm", @"hh\:mm" }, null, out TimeSpan parsedTime))
+        throw new ArgumentException("Invalid time format. Expected format: HH or HH:mm");
+
+      entity.Date = dto.Date;
+      entity.Time = parsedTime;      
+
+      entity.Description = dto.Description;
+      entity.ClientId = dto.ClientId;
+      entity.ClientType = dto.ClientType.ToUpper();
+      entity.FileId = dto.FileId;
+      entity.FileNumber = dto.FileNumber;
+      entity.LawyerId = dto.LawyerId;
+
+      await _dbContext.SaveChangesAsync();
+
+      return await GetEventAByIdAsync(eventId);
+    }
+
+
+    public async Task<EventCDTO?> UpdateEventCAsync(int eventId, EventCDTO dto)
+    {
+      var entity = await _dbContext.EventsC.FindAsync(eventId);
+      if (entity == null) return null;
+
+      if (dto.Date <= DateTime.MinValue)
+        throw new ArgumentException("Invalid date.");
+
+      if (string.IsNullOrWhiteSpace(dto.Time))
+        throw new ArgumentException("Time is required.");
+
+      if (!TimeSpan.TryParseExact(dto.Time, new[] { @"h", @"hh", @"h\:mm", @"hh\:mm" }, null, out TimeSpan parsedTime))
+        throw new ArgumentException("Invalid time format. Expected format: HH or HH:mm");
+
+      entity.Date = dto.Date;
+      entity.Time = parsedTime;       
+
+      entity.Description = dto.Description;
+      entity.ClientId = dto.ClientId;
+      entity.ClientType = dto.ClientType.ToUpper();
+      entity.FileId = dto.FileId;
+      entity.FileNumber = dto.FileNumber;
+      entity.LawyerId = dto.LawyerId;
+
+      await _dbContext.SaveChangesAsync();
+
+      return await GetEventCByIdAsync(eventId);
+    }
+
+    public async Task DeleteEventA(int eventId)
+    {
+      var eventA = await _dbContext.EventsA.FindAsync(eventId);
+      if (eventA == null) throw new KeyNotFoundException("Evenimentul nu a fost găsit.");
+
+      _dbContext.EventsA.Remove(eventA);
+      await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteEventC(int eventId)
+    {
+      var eventC = await _dbContext.EventsC.FindAsync(eventId);
+      if (eventC == null) throw new KeyNotFoundException("Evenimentul nu a fost găsit.");
+
+      _dbContext.EventsC.Remove(eventC);
+      await _dbContext.SaveChangesAsync();
+    }
+
+
+
   }
 }

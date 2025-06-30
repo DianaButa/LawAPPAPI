@@ -7,6 +7,8 @@ namespace LawProject.Models
     public int FileId { get; set; }
     public string FileNumber { get; set; }
 
+
+
     public double OreStudiu { get; set; }
 
     public int RaportId { get; set; }

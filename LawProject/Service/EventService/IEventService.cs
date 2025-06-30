@@ -13,5 +13,16 @@ namespace LawProject.Service.EventService
 
     Task<EventCDTO> AddEventCAsync(EventCDTO eventCDto);
     Task<List<EventCDTO>> GetAllEventsCAsync();
+
+    Task<EventCDTO?> UpdateEventCAsync(int eventId, EventCDTO dto);
+
+    Task<EventADTO?> UpdateEventAAsync(int eventId, EventADTO dto);
+    Task<EventCDTO?> GetEventCByIdAsync(int eventId);
+
+    Task<EventADTO?> GetEventAByIdAsync(int eventId);
+    Task DeleteEventC(int eventId);
+    Task DeleteEventA(int eventId);
+
+
   }
 }

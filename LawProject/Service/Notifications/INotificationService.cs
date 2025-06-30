@@ -18,6 +18,7 @@ namespace LawProject.Service.Notifications
     Task<bool> MarkAllAsReadAsync(int userId);
     Task<bool> DeleteNotificationAsync(int notificationId);
     Task<bool> DeleteOldNotificationsAsync(int daysOld);
+    Task<bool> NotificationExistsForFileAndDateAsync(string fileNumber, DateTime date);
 
   }
 }

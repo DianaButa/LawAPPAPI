@@ -1,3 +1,5 @@
+using StackExchange.Redis;
+
 namespace LawProject.DTO
 {
  
@@ -24,6 +26,7 @@ namespace LawProject.DTO
       public int? FileId { get; set; }
       public string? FileNumber { get; set; }
       public double? OreStudiu { get; set; }
+      public string? ClientName { get; set; }
     }
   }
 

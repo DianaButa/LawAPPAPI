@@ -29,7 +29,7 @@ namespace LawProject.Service
         }
 
         // Așteaptă 5 minute înainte de următoarea verificare
-        await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+        await Task.Delay(TimeSpan.FromMinutes(50), stoppingToken);
       }
     }
   }
